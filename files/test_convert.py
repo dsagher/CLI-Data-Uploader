@@ -73,10 +73,10 @@ def test_date():
 def test_extract_unique_values():
      # Needs work. Should be able to do - output is in this list
     lst_of_dicts = [{'hello':'1'},{'hello':'0'},{'hello':'1'},{'hello':'0'}]
-    assert extract_unique_values(*lst_of_dicts) == [{'hello':'1'},{'hello':'0'}]
+    assert extract_unique_values(lst_of_dicts) == (True, {'hello'})
 
-    lst_of_dicts = [{'hello':'1'},{'hello':'0'},{'hey':'1'},{'hey':'1'}]
-    assert extract_unique_values(*lst_of_dicts) == [{'hello':'1'},{'hey':'1'},{'hello':'0'}]
+    lst_of_dicts = [{'hello':'1'},{'hello':'0'},{'hey':'1'},{'hey':'1'}, {'who':'3'}]
+    assert extract_unique_values(lst_of_dicts) == (True, {'hello','hey'})
 
     
  

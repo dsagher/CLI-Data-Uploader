@@ -2,7 +2,7 @@ import csv
 import re
 from pprint import pprint
 
-# I'm in arg!
+
 with open('input/taylor_swift_spotify.csv', 'r') as infile:
     reader = csv.DictReader(infile, lineterminator='')
     
@@ -32,6 +32,7 @@ class DataSet:
         return self._values
 
 dataset = DataSet()
+
 def extract_unique_values(lst):
 
     '''
@@ -55,7 +56,11 @@ def extract_unique_values(lst):
             keys.add(k)
 
     # Step 2: Identify boolean columns - Set comprehension
-    boolean_columns = {k for k in keys if {(k, 0), (k, 1)}.issubset(collect)}
+    boolean_columns = set()
+    for k in keys:
+        values = {v for key, v in collect if key == k}
+        if values.issubset({'0', '1'}):
+            boolean_columns.add(k)
 
     # Step 3: Create a dictionary to store unique values for each key
     unique_values = {k: set() for k in keys}
@@ -69,11 +74,11 @@ def extract_unique_values(lst):
         dataset.add_columns(key)
         dataset.add_unique_values(values)
         if key in boolean_columns:
-            return True
-        
+            return True, boolean_columns
+    
 
-    pprint(dataset.columns)
-    pprint(dataset.values)
+lst_of_dicts = [{'hello':'1'},{'hello':'0'},{'hey':'1'},{'hey':'1'}, {'who':'3'}]
+print(extract_unique_values(lst_of_dicts))
 
 def del_index():
 
@@ -109,6 +114,7 @@ def get_type(lst_of_dicts):
              
     return result
 
-get_type(lst)
+# get_type(lst)
 
-extract_unique_values(lst)
+# extract_unique_values(lst)
+# print(type(lst))

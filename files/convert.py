@@ -2,6 +2,7 @@ import csv
 import re
 from pprint import pprint
 
+# I'm in arg!
 with open('input/taylor_swift_spotify.csv', 'r') as infile:
     reader = csv.DictReader(infile, lineterminator='')
     

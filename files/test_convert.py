@@ -70,13 +70,13 @@ def test_date():
     assert get_type(lst_of_dicts) == [{'column': 'hello', 'type': 'Date'}]
 
 
+def test_bool():
+    pass
+
 def test_extract_unique_values():
-     # Needs work. Should be able to do - output is in this list
+
     lst_of_dicts = [{'hello':'1'},{'hello':'0'},{'hello':'1'},{'hello':'0'}]
     assert extract_unique_values(lst_of_dicts) == (True, {'hello'})
 
     lst_of_dicts = [{'hello':'1'},{'hello':'0'},{'hey':'1'},{'hey':'1'}, {'who':'3'}]
     assert extract_unique_values(lst_of_dicts) == (True, {'hello','hey'})
-
-    
- 

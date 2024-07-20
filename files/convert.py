@@ -1,6 +1,7 @@
 import csv
 import re
 from pprint import pprint
+from DataSet import DataSet
 
 
 with open('input/taylor_swift_spotify.csv', 'r') as infile:
@@ -10,33 +11,12 @@ with open('input/taylor_swift_spotify.csv', 'r') as infile:
     for row in reader:
         lst.append(row)
 
-class DataSet:
-    
-    column_lst = list()
-    unique_lst = list()
-
-    def add_columns(self, columns):
-        self.column_lst.append(columns)
-        self._columns = self.column_lst
-    
-    def add_unique_values(self, unique_values):
-        self.unique_lst.append(unique_values)
-        self._values = self.unique_lst
-        
-    @property   
-    def columns(self):
-        return self._columns
-    
-    @property
-    def values(self):
-        return self._values
-
 dataset = DataSet()
 
 def extract_unique_values(lst):
 
     '''
-    This function takes in multiple lists of dictionaries via *args. Each dictionary is unpacked to collect unique key-value pairs.
+    This function takes list of dictionaries. Each dictionary is unpacked to collect unique key-value pairs.
     It identifies boolean columns and stores unique values for each key.
 
     Args:
@@ -69,7 +49,7 @@ def extract_unique_values(lst):
     for key, value in collect:
         unique_values[key].add(value)
 
-
+    # Step 5. Add keys and Values to Class Instance, and return True + column names for boolean columns.
     for key, values in unique_values.items():
         dataset.add_columns(key)
         dataset.add_unique_values(values)
@@ -97,14 +77,14 @@ def get_type(lst_of_dicts):
     for i in first:   
         
 
-        if re.fullmatch(r'-?[\d\.]+',first[i]) and extract_unique_values != True:
+        if re.fullmatch(r'-?[\d\.]+',first[i]) and extract_unique_values(first[i]) != True:
             result.append({'column': i, 'type': 'Numeric'})    
 
         # Get Date.
         elif re.fullmatch(r'(?:\d{2})?\d{1,2}-\d{1,2}-\d{2}(?:\d{2})?', first[i]):
             result.append({'column': i, 'type': 'Date'}) 
             
-        elif re.fullmatch(r'(true|false|0|1)',first[i], flags=re.IGNORECASE) and extract_unique_values == True:
+        elif re.fullmatch(r'(true|false|0|1)',first[i], flags=re.IGNORECASE) and extract_unique_values(first[i]) == True:
             result.append({'column': i, 'type': 'Boolean'})
 
         # Get Character. Add support to get rid of only ints and floats
@@ -115,6 +95,5 @@ def get_type(lst_of_dicts):
     return result
 
 # get_type(lst)
-
 # extract_unique_values(lst)
 # print(type(lst))

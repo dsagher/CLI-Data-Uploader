@@ -48,8 +48,11 @@ def extract_unique_values(lst):
     # Step 5. Add keys and Values to Class Instance, and return True + column names for boolean columns.
     for key, values in unique_values.items():
         dataset.add_columns(key)
-        dataset.add_unique_values(key,values)
+        dataset.add_unique_values(values)
 
+    dataset.add_dict(unique_values)
+        # Maybe add a dataset.dicts
+    
     return boolean_columns
      
 
@@ -113,16 +116,4 @@ def get_type(lst_of_dicts):
              
     return result
 
-
-# dataset = DataSet()
 # extract_unique_values(lst)
-# print(len(dataset.columns))
-# 
-
-    # del_index(lst, reader)
-    # pprint(reader.fieldnames)
-    # pprint(get_type(lst))
-    # print(reader.fieldnames)
-    # extract_unique_values(lst)
-    # pprint(lst)
-    # print(type(lst))

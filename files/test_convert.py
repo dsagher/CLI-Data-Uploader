@@ -1,6 +1,8 @@
 import pytest
 from convert import get_type, extract_unique_values
 
+
+
 def test_char():
     lst_of_dicts = [{'hello':'123'}, {'goodbye':'456'}]
     assert get_type(lst_of_dicts) != [{'column': 'hello', 'type': 'Character'}]
@@ -52,6 +54,10 @@ def test_numeric():
     lst_of_dicts = [{'hello':'!23'}]
     assert get_type(lst_of_dicts) != [{'column': 'hello', 'type': 'Numeric'}]
 
+    lst_of_dicts = [{'hello':'1'}, {'hello':'0'}]
+    assert get_type(lst_of_dicts) != [{'column': 'hello', 'type': 'Numeric'}]
+    
+
 def test_date():
 
     lst_of_dicts = [{'hello': '1995-02-19'}]
@@ -71,12 +77,30 @@ def test_date():
 
 
 def test_bool():
-    pass
+    
+    lst_of_dicts = [{'hello':'True'},{'hello':'False'}]
+    assert get_type(lst_of_dicts) == [{'column': 'hello', 'type': 'Boolean'}]
+
+    lst_of_dicts = [{'hello':'1'}, {'hello':'0'}]
+    assert get_type(lst_of_dicts) == [{'column': 'hello', 'type': 'Boolean'}]
+
+    lst_of_dicts = [{'hello':'true'},{'hello':'false'}]
+    assert get_type(lst_of_dicts) == [{'column': 'hello', 'type': 'Boolean'}]
+
+    lst_of_dicts = [{'hello':'TRUE'},{'hello':'FALSE'}]
+    assert get_type(lst_of_dicts) == [{'column': 'hello', 'type': 'Boolean'}]
+
+    lst_of_dicts = [{'hello':'t'},{'hello':'F'}]
+    assert get_type(lst_of_dicts) == [{'column': 'hello', 'type': 'Boolean'}]
 
 def test_extract_unique_values():
 
     lst_of_dicts = [{'hello':'1'},{'hello':'0'},{'hello':'1'},{'hello':'0'}]
-    assert extract_unique_values(lst_of_dicts) == (True, {'hello'})
+    assert extract_unique_values(lst_of_dicts) == {'hello'}
 
     lst_of_dicts = [{'hello':'1'},{'hello':'0'},{'hey':'1'},{'hey':'1'}, {'who':'3'}]
-    assert extract_unique_values(lst_of_dicts) == (True, {'hello','hey'})
+    assert extract_unique_values(lst_of_dicts) == {'hello','hey'}
+
+    
+
+

@@ -1,12 +1,9 @@
-import csv
 import re
-import pandas as pd
 from pprint import pprint
 from DataSet import DataSet
-from arg import file
+import csv
 
-
-with open(file, 'r') as infile:
+with open('input/taylor_swift_spotify.csv', 'r') as infile:
     reader = csv.DictReader(infile, lineterminator='')  
     lst = list(reader)
 
@@ -37,8 +34,8 @@ def extract_unique_values(lst):
     # Step 2: Identify boolean columns - Set comprehension
     boolean_columns = set()
     for k in keys:
-        values = {v for key, v in collect if key == k}
-        if values.issubset({'0', '1', 'true', 'false', 'True', 'False'}):
+        values = {v.lower() for key, v in collect if key == k}
+        if values.issubset({'0', '1', 'true', 'false', 't', 'f'}):
             boolean_columns.add(k)
 
     # Step 3: Create a dictionary to store unique values for each key
@@ -51,15 +48,11 @@ def extract_unique_values(lst):
     # Step 5. Add keys and Values to Class Instance, and return True + column names for boolean columns.
     for key, values in unique_values.items():
         dataset.add_columns(key)
-        dataset.add_unique_values(values)
-        if key in boolean_columns:
-            return boolean_columns
-        else:
-            return []
-    
-    
-# lst_of_dicts = [{'hello':'1'},{'hello':'0'},{'hey':'1'},{'hey':'1'}, {'who':'3'}]
-# print(extract_unique_values(lst_of_dicts))
+        dataset.add_unique_values(key,values)
+
+    return boolean_columns
+     
+
 
 def del_index(lst, reader):
 
@@ -103,27 +96,33 @@ def get_type(lst_of_dicts):
     for i in first:   
         
 
-        if re.fullmatch(r'-?\d+(\.\d+)?',first[i]) and i not in boolean_columns:
+        if re.fullmatch(r'-?(?:\d+)?(?:\.\d+)?',first[i]) and i not in boolean_columns:
             result.append({'column': i, 'type': 'Numeric'})    
 
         # Get Date.
         elif re.fullmatch(r'(?:\d{2})?\d{1,2}-\d{1,2}-\d{2}(?:\d{2})?', first[i]):
             result.append({'column': i, 'type': 'Date'}) 
             
-        elif re.fullmatch(r'(true|false|0|1)',first[i], flags=re.IGNORECASE) and i in boolean_columns:
+        elif i in boolean_columns:
             result.append({'column': i, 'type': 'Boolean'})
 
         # Get Character. Add support to get rid of only ints and floats
-        elif re.fullmatch(r'(?!(?:-?\d+)$)(?!(?:-?\d+\.\d+)$)(?!(?:(true|True|TRUE|false|False|FALSE)$)).+', first[i]):
+        elif re.fullmatch(r'(?!(?:-?\d+)$)(?!(?:-?\d+\.\d+)$)(?!(?:(true|false|t|f)$)).+', first[i], flags=re.IGNORECASE):
             result.append({'column': i, 'type': 'Character'}) 
         
              
     return result
 
-del_index(lst, reader)
-# pprint(reader.fieldnames)
-pprint(get_type(lst))
-# print(reader.fieldnames)
+
+# dataset = DataSet()
 # extract_unique_values(lst)
-# pprint(lst)
-# print(type(lst))
+# print(len(dataset.columns))
+# 
+
+    # del_index(lst, reader)
+    # pprint(reader.fieldnames)
+    # pprint(get_type(lst))
+    # print(reader.fieldnames)
+    # extract_unique_values(lst)
+    # pprint(lst)
+    # print(type(lst))

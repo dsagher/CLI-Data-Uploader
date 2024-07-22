@@ -1,15 +1,14 @@
 import csv
 import re
+import pandas as pd
 from pprint import pprint
 from DataSet import DataSet
+from arg import file
 
 
-with open('input/taylor_swift_spotify.csv', 'r') as infile:
-    reader = csv.DictReader(infile, lineterminator='')
-    
-    lst = list()
-    for row in reader:
-        lst.append(row)
+with open(file, 'r') as infile:
+    reader = csv.DictReader(infile, lineterminator='')  
+    lst = list(reader)
 
 dataset = DataSet()
 
@@ -39,7 +38,7 @@ def extract_unique_values(lst):
     boolean_columns = set()
     for k in keys:
         values = {v for key, v in collect if key == k}
-        if values.issubset({'0', '1'}):
+        if values.issubset({'0', '1', 'true', 'false', 'True', 'False'}):
             boolean_columns.add(k)
 
     # Step 3: Create a dictionary to store unique values for each key
@@ -54,19 +53,44 @@ def extract_unique_values(lst):
         dataset.add_columns(key)
         dataset.add_unique_values(values)
         if key in boolean_columns:
-            return True, boolean_columns
+            return boolean_columns
+        else:
+            return []
     
+    
+# lst_of_dicts = [{'hello':'1'},{'hello':'0'},{'hey':'1'},{'hey':'1'}, {'who':'3'}]
+# print(extract_unique_values(lst_of_dicts))
 
-lst_of_dicts = [{'hello':'1'},{'hello':'0'},{'hey':'1'},{'hey':'1'}, {'who':'3'}]
-print(extract_unique_values(lst_of_dicts))
+def del_index(lst, reader):
 
-def del_index():
+    if reader.fieldnames and '' in reader.fieldnames:
+        # Get the index of the empty string column
+        index = reader.fieldnames.index('')
+        
+        # Check if this empty string column is present in all rows
+        is_index_column = all('' in row for row in lst)
+        
+        if is_index_column:
 
-    # Make Optional?
-    if [''] in reader.fieldnames:
-        del first[''] # Delete index if exists
-    else:
-        pass
+            values = [row.get('') for row in lst]
+            numbers = [str(i) for i in range(15)]
+            has_expected_values = all(value in numbers for value in values[:15])
+
+            unique_values = set(values)
+            is_unique = len(unique_values) == len(values)
+            
+            if has_expected_values and is_unique:
+                # Confirm with the user
+                answer = input('Empty column detected. It appears to be an index column. Is this correct? (yes/y to confirm) ')
+                if answer.lower() in ['yes', 'y']:
+                    # Remove the empty string column from the headers
+                    reader.fieldnames.pop(index)
+                    
+                    # Remove the empty string column from each dictionary in the list
+                    for row in lst:
+                        if '' in row:
+                            del row['']
+        
 
 
 def get_type(lst_of_dicts):
@@ -74,17 +98,19 @@ def get_type(lst_of_dicts):
     first = lst_of_dicts[0]
     result = list()
 
+    boolean_columns = extract_unique_values(lst_of_dicts)
+    
     for i in first:   
         
 
-        if re.fullmatch(r'-?[\d\.]+',first[i]) and extract_unique_values(first[i]) != True:
+        if re.fullmatch(r'-?\d+(\.\d+)?',first[i]) and i not in boolean_columns:
             result.append({'column': i, 'type': 'Numeric'})    
 
         # Get Date.
         elif re.fullmatch(r'(?:\d{2})?\d{1,2}-\d{1,2}-\d{2}(?:\d{2})?', first[i]):
             result.append({'column': i, 'type': 'Date'}) 
             
-        elif re.fullmatch(r'(true|false|0|1)',first[i], flags=re.IGNORECASE) and extract_unique_values(first[i]) == True:
+        elif re.fullmatch(r'(true|false|0|1)',first[i], flags=re.IGNORECASE) and i in boolean_columns:
             result.append({'column': i, 'type': 'Boolean'})
 
         # Get Character. Add support to get rid of only ints and floats
@@ -94,6 +120,10 @@ def get_type(lst_of_dicts):
              
     return result
 
-# get_type(lst)
+del_index(lst, reader)
+# pprint(reader.fieldnames)
+pprint(get_type(lst))
+# print(reader.fieldnames)
 # extract_unique_values(lst)
+# pprint(lst)
 # print(type(lst))

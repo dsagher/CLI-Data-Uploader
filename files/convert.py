@@ -1,15 +1,9 @@
 import re
-from pprint import pprint
-from DataSet import DataSet
-import csv
+from DataSet import dataset
 
-with open('input/taylor_swift_spotify.csv', 'r') as infile:
-    reader = csv.DictReader(infile, lineterminator='')  
-    lst = list(reader)
 
-dataset = DataSet()
 
-def extract_unique_values(lst):
+def extract_unique_values(lst: list) -> set: 
 
     '''
     This function takes list of dictionaries. Each dictionary is unpacked to collect unique key-value pairs.
@@ -33,6 +27,7 @@ def extract_unique_values(lst):
 
     # Step 2: Identify boolean columns - Set comprehension
     boolean_columns = set()
+
     for k in keys:
         values = {v.lower() for key, v in collect if key == k}
         if values.issubset({'0', '1', 'true', 'false', 't', 'f'}):
@@ -57,39 +52,7 @@ def extract_unique_values(lst):
      
 
 
-def del_index(lst, reader):
-
-    if reader.fieldnames and '' in reader.fieldnames:
-        # Get the index of the empty string column
-        index = reader.fieldnames.index('')
-        
-        # Check if this empty string column is present in all rows
-        is_index_column = all('' in row for row in lst)
-        
-        if is_index_column:
-
-            values = [row.get('') for row in lst]
-            numbers = [str(i) for i in range(15)]
-            has_expected_values = all(value in numbers for value in values[:15])
-
-            unique_values = set(values)
-            is_unique = len(unique_values) == len(values)
-            
-            if has_expected_values and is_unique:
-                # Confirm with the user
-                answer = input('Empty column detected. It appears to be an index column. Is this correct? (yes/y to confirm) ')
-                if answer.lower() in ['yes', 'y']:
-                    # Remove the empty string column from the headers
-                    reader.fieldnames.pop(index)
-                    
-                    # Remove the empty string column from each dictionary in the list
-                    for row in lst:
-                        if '' in row:
-                            del row['']
-        
-
-
-def get_type(lst_of_dicts):
+def get_type(lst_of_dicts: list) -> list:
 
     first = lst_of_dicts[0]
     result = list()
@@ -102,18 +65,44 @@ def get_type(lst_of_dicts):
         if re.fullmatch(r'-?(?:\d+)?(?:\.\d+)?',first[i]) and i not in boolean_columns:
             result.append({'column': i, 'type': 'Numeric'})    
 
-        # Get Date.
         elif re.fullmatch(r'(?:\d{2})?\d{1,2}-\d{1,2}-\d{2}(?:\d{2})?', first[i]):
             result.append({'column': i, 'type': 'Date'}) 
             
         elif i in boolean_columns:
             result.append({'column': i, 'type': 'Boolean'})
 
-        # Get Character. Add support to get rid of only ints and floats
         elif re.fullmatch(r'(?!(?:-?\d+)$)(?!(?:-?\d+\.\d+)$)(?!(?:(true|false|t|f)$)).+', first[i], flags=re.IGNORECASE):
-            result.append({'column': i, 'type': 'Character'}) 
-        
+            result.append({'column': i, 'type': 'Character'})
+
+        else:
+            result.append({'column': i, 'type': 'Unknown'})        
              
     return result
 
-# extract_unique_values(lst)
+
+def del_index(lst: list):
+
+    if dataset.columns and '' in dataset.columns:
+        index = dataset.columns.index('')
+
+        is_in_all_dcts = all('' in dct for dct in lst)
+        
+        if is_in_all_dcts:
+
+            values = [dct.get('') for dct in lst]
+            numbers = [str(i) for i in range(15)]
+            has_expected_values = values[:15] == numbers
+
+            unique_values = set(values)
+            is_unique = len(unique_values) == len(values)
+            
+            if has_expected_values and is_unique:
+                # Confirm with the user
+                answer = input('Empty column detected. It appears to be an index column. Is this correct? (yes/y to confirm) ')
+                if answer.lower() in ['yes', 'y']:
+                    # Remove the empty string column from DataSet class
+                    dataset.columns.pop(index)
+                    # Remove the empty string column from each dictionary in the list
+                    for dct in lst:
+                        if '' in dct:
+                            del dct['']

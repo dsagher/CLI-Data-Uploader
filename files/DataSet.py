@@ -36,4 +36,6 @@ class DataSet:
     def dicts(self):
         return self.dict_lst
     
+dataset = DataSet()
+    
 

@@ -1,8 +1,6 @@
-from arg import file
 import csv
-import os
-from convert import extract_unique_values, del_index, get_type
-from pprint import pprint
+from convert import del_index, get_type
+import argparse
 '''
 
 main() will call arg to ask user for file and arguments. 
@@ -20,16 +18,28 @@ generate_ddl() - will generate SQL data definition language and pass result to p
 
 push()- will use SQLalchemy to push to a Postgres server. 
 
-
 '''
 
+
 def main():
+
+    file = input('What is the file path? ')
 
     with open(file, 'r') as infile:
         reader = csv.DictReader(infile, lineterminator='')  
         lst = list(reader)
+
+    get_type(lst)
+    lst = del_index(lst)
+
+
+def parse():
+    parser = argparse.ArgumentParser(description="Convert a dataset to SQL DDL and upload to PostgreSQL.")
+    parser.add_argument('--host', default='localhost', type=str, help='Database host.')
+    parser.add_argument('--port', default=5432, type=int, help='Database port.')
+    return parser.parse_args()
+
     
-    return get_type(lst)
+# summary = input('Would you like a summary? ')
 
-
-pprint(main())
+main()

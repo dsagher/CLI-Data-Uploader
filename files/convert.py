@@ -45,8 +45,7 @@ def extract_unique_values(lst: list) -> set:
         dataset.add_columns(key)
         dataset.add_unique_values(values)
 
-    dataset.add_dict(unique_values)
-        # Maybe add a dataset.dicts
+    dataset.dicts = unique_values
     
     return boolean_columns
      
@@ -80,7 +79,7 @@ def get_type(lst_of_dicts: list) -> list:
     return result
 
 
-def del_index(lst: list):
+def del_index(lst: list) -> None:
 
     if dataset.columns and '' in dataset.columns:
         index = dataset.columns.index('')

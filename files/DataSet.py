@@ -3,17 +3,12 @@ class DataSet:
     def __init__(self):
         self.column_lst = []
         self.unique_lst = []
-        self.dict_lst = []
 
     def add_columns(self, columns):
         self.column_lst.append(columns)
         
-    
     def add_unique_values(self, unique_values):
         self.unique_lst.append(unique_values)
-    
-    def add_dict(self, lst_of_dcts):
-        self.dict_lst.append(lst_of_dcts)
     
     def row_count():
         pass
@@ -32,9 +27,9 @@ class DataSet:
     def values(self):
         return self.unique_lst
     
-    @property
+    
     def dicts(self):
-        return self.dict_lst
+        return self.dicts
     
 dataset = DataSet()
     

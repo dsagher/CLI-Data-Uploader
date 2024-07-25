@@ -1,8 +1,6 @@
 import re
 from DataSet import dataset
 
-
-
 def extract_unique_values(lst: list) -> set: 
 
     '''
@@ -80,6 +78,8 @@ def get_type(lst_of_dicts: list) -> list:
 
 
 def del_index(lst: list) -> None:
+
+    # Add functionality to add index if not exists
 
     if dataset.columns and '' in dataset.columns:
         index = dataset.columns.index('')

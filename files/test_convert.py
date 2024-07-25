@@ -1,8 +1,6 @@
 import pytest
 from convert import get_type, extract_unique_values
 
-
-
 def test_char():
     lst_of_dicts = [{'hello':'123'}, {'goodbye':'456'}]
     assert get_type(lst_of_dicts) != [{'column': 'hello', 'type': 'Character'}]
@@ -100,7 +98,3 @@ def test_extract_unique_values():
 
     lst_of_dicts = [{'hello':'1'},{'hello':'0'},{'hey':'1'},{'hey':'1'}, {'who':'3'}]
     assert extract_unique_values(lst_of_dicts) == {'hello','hey'}
-
-    
-
-

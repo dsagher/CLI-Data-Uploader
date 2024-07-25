@@ -3,19 +3,19 @@ import csv
 from pprint import pprint
 
 
-# will take out later and use only in main()  
-with open('input/taylor_swift_spotify.csv', 'r') as infile:
-    reader = csv.DictReader(infile, lineterminator='')  
-    lst = list(reader)
-
-
 def get_boolean(key, values):
     pass
 
-def get_numeric(key, value):
-    # initialize dct 
+def get_numeric(key: str, value: set):
+
+    '''
+    The problem I'm running into right now is that this function is getting looped, causing a few problems. 
+    One of them being - I want to ask 'Is this money' to force Numeric, but that question is being asked a bunch 
+    of times. So I think I need to collect the list in the main function, and parse through it inside this function.
+    Or I should ask this in the main function, even though that kind of splits up the thought. 
+    '''
+    # Initialize
     dct = dict()
-    # initialize lst
     len_lst = list()
     mx_lst = list()
     mn_lst = list()
@@ -23,25 +23,24 @@ def get_numeric(key, value):
     # Change value from set to list to iterate
     dct[key] = list(value)
     
-    # Generator expression for max str length in each value
-    cnt = max(len(i) for i in dct[key])
-
-    # append to len_lst
-    len_lst.extend((key, cnt))
-    
-    # Find max #
+    # Generator expressions
+    cnt = str(max(len(i) for i in dct[key]))
     mx = max(i for i in dct[key])
-
-    # add to mx_lst
-    mx_lst.extend((key, mx))
-
-    # Find min #
     mn = min(i for i in dct[key])
+    dec = any('.' in i for i in dct[key])
+    # is_money = input('Does this field contain currency? (y/n) ')
 
-    # append to min lst 
-    mn_lst.extend((key, mn))
+    if dec:
+        print(f'Use Numeric for {key}')
+    elif dec:
+        print(f'Use Numeric or Floating Point Precision for {key}')
+    else:
+        print(f'Use Integer for {key}')
+    
+    
+    return f'length is {cnt}, max is {mx}, min is {mn}, has decimal? {dec}'
 
-    print(len_lst, mx_lst, mn_lst)
+    
 
 def get_char(key, values):
     pass
@@ -49,24 +48,31 @@ def get_char(key, values):
 def get_date(key, values):
     pass
 
-response = get_type(lst)
+def get_sub_type(response: list) -> dict:
 
-def get_sub_type(response):
+    result = dict()
 
     for dct in response: 
         for field in dataset.columns:
             if dct['column'] == field and dct['type'] == 'Numeric':
                 # print('hooray,', dct['column'], 'is a', dct['type'])
-                get_numeric(field, dataset.dicts[field])    
-            elif dct['column'] == field and dct['type'] == 'Character':
-                # print('hooray,', dct['column'], 'is a', dct['type'])
-                get_char(field, dataset.dicts[field])
-            elif dct['column'] == field and dct['type'] == 'Boolean':
-                # print('hooray,', dct['column'], 'is a', dct['type'])
-                get_boolean(field, dataset.dicts[field])
-            elif dct['column'] == field and dct['type'] == 'Date':
-                # print('hooray,', dct['column'], 'is a', dct['type'])
-                get_date(field, dataset.dicts[field])
+                result[field] = get_numeric(field, dataset.dicts[field])
 
-get_sub_type(response)
-# print(response)
+            # elif dct['column'] == field and dct['type'] == 'Character':
+            #     # print('hooray,', dct['column'], 'is a', dct['type'])
+            #     result[field] = get_char(field, dataset.dicts[field])
+            # elif dct['column'] == field and dct['type'] == 'Boolean':
+            #     # print('hooray,', dct['column'], 'is a', dct['type'])
+            #     result[field] = get_boolean(field, dataset.dicts[field])
+            # elif dct['column'] == field and dct['type'] == 'Date':
+            #     # print('hooray,', dct['column'], 'is a', dct['type'])
+            #     result[field] = get_date(field, dataset.dicts[field])
+
+    return result
+
+with open('input/taylor_swift_spotify.csv', 'r') as infile:
+    reader = csv.DictReader(infile, lineterminator='')  
+    lst = list(reader)
+
+response = get_type(lst)
+pprint(get_sub_type(response))

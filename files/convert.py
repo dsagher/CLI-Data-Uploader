@@ -52,7 +52,7 @@ def extract_unique_values(lst: list) -> set:
     
     return boolean_columns
 
-extract_unique_values(lst)
+# extract_unique_values(lst)
 
 def get_type(lst_of_dicts: list) -> list:
 
@@ -102,7 +102,7 @@ def del_index(lst: list) -> None:
             
             if has_expected_values and is_unique:
                 # Confirm with the user
-                answer = input('Empty column detected. It appears to be an index column. Is this correct? (yes/y to confirm) ')
+                answer = input('Empty column detected. Would you like to delete? (yes/y to confirm) ')
                 if answer.lower() in ['yes', 'y']:
                     # Remove the empty string column from DataSet class
                     dataset.columns.pop(index)
@@ -110,3 +110,11 @@ def del_index(lst: list) -> None:
                     for dct in lst:
                         if '' in dct:
                             del dct['']
+    
+    elif '' not in dataset.columns[0] and not has_expected_values and not is_unique:
+
+        return 'No Index'
+    
+    '''
+    Might have to make two seperate functions - one for checking if index exists, one for deleting.
+    '''

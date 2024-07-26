@@ -3,12 +3,17 @@ class DataSet:
     def __init__(self):
         self.column_lst = []
         self.unique_lst = []
+        self.decimal_lst = []
 
     def add_columns(self, columns):
         self.column_lst.append(columns)
         
     def add_unique_values(self, unique_values):
         self.unique_lst.append(unique_values)
+
+    def add_decimal_values(self, values):
+        self.decimal_lst.append(values)
+    
     
     def row_count():
         pass
@@ -30,6 +35,10 @@ class DataSet:
  
     def dicts(self):
         return self.dicts
+    
+    
+    def decimals(self):
+        return self.decimals
     
 
     

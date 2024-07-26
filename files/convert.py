@@ -1,5 +1,10 @@
 import re
 from DataSet import dataset
+import csv
+
+with open('input/taylor_swift_spotify.csv', 'r') as infile:
+    reader = csv.DictReader(infile, lineterminator='')  
+    lst = list(reader)
 
 def extract_unique_values(lst: list) -> set: 
 
@@ -46,8 +51,8 @@ def extract_unique_values(lst: list) -> set:
     dataset.dicts = unique_values
     
     return boolean_columns
-     
 
+extract_unique_values(lst)
 
 def get_type(lst_of_dicts: list) -> list:
 

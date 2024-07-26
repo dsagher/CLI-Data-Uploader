@@ -1,4 +1,4 @@
-from convert import get_type, extract_unique_values, dataset
+from convert import get_type, dataset
 import csv
 from pprint import pprint
 
@@ -6,7 +6,7 @@ from pprint import pprint
 def get_boolean(key, values):
     pass
 
-def get_numeric(key: str, value: set):
+def get_numeric(key: str, value: set) -> str:
 
     '''
     The problem I'm running into right now is that this function is getting looped, causing a few problems. 
@@ -16,9 +16,7 @@ def get_numeric(key: str, value: set):
     '''
     # Initialize
     dct = dict()
-    len_lst = list()
-    mx_lst = list()
-    mn_lst = list()
+    lst = list()
     
     # Change value from set to list to iterate
     dct[key] = list(value)
@@ -28,17 +26,34 @@ def get_numeric(key: str, value: set):
     mx = max(i for i in dct[key])
     mn = min(i for i in dct[key])
     dec = any('.' in i for i in dct[key])
-    # is_money = input('Does this field contain currency? (y/n) ')
-
+    precise = ''
+    
     if dec:
-        print(f'Use Numeric for {key}')
-    elif dec:
-        print(f'Use Numeric or Floating Point Precision for {key}')
+        for i in dct[key]:
+            left, right = i.split('.')
+            cnt_left = len(left)
+            cnt_right = len(right)
+            
+    # is_money = input('Does this field contain currency? (y/n) ')
+    # Could ask "which columns should contain precise precision?"
+
+    if dec and precise:
+        result = f'{key} NUMERIC'
+    elif dec and not precise and cnt <= '6':
+        result = f'{key} REAL'
+    elif dec and not precise and cnt <= '15':
+        result = f'{key} DOUBLE PRECISION'
+    elif not dec and '-32768' <= mn and mx <= '32767':
+        result = f'{key} SMALLINT'
+    elif not dec and '-2147483648' <= mn and mx <= '2147483647':
+        result = f'{key} INT'
+    elif not dec and '-9223372036854775808' <= mn and mx <= '9223372036854775807':
+        result = f'{key} BIGINT'
     else:
-        print(f'Use Integer for {key}')
+        result = f'Unknown for: {key}'
     
-    
-    return f'length is {cnt}, max is {mx}, min is {mn}, has decimal? {dec}'
+    return result
+    # return f'length is {cnt}, max is {mx}, min is {mn}, has decimal? {dec}'
 
     
 
@@ -48,15 +63,15 @@ def get_char(key, values):
 def get_date(key, values):
     pass
 
-def get_sub_type(response: list) -> dict:
+def get_sub_type(response: list) -> list:
 
-    result = dict()
+    result = list()
 
     for dct in response: 
         for field in dataset.columns:
             if dct['column'] == field and dct['type'] == 'Numeric':
                 # print('hooray,', dct['column'], 'is a', dct['type'])
-                result[field] = get_numeric(field, dataset.dicts[field])
+                result.append(get_numeric(field, dataset.dicts[field]))
 
             # elif dct['column'] == field and dct['type'] == 'Character':
             #     # print('hooray,', dct['column'], 'is a', dct['type'])
@@ -75,4 +90,4 @@ with open('input/taylor_swift_spotify.csv', 'r') as infile:
     lst = list(reader)
 
 response = get_type(lst)
-pprint(get_sub_type(response))
+print(get_sub_type(response))

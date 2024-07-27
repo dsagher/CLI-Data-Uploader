@@ -81,6 +81,13 @@ def get_type(lst_of_dicts: list) -> list:
              
     return result
 
+def detect_index():
+    
+    ''' 
+    Bring over conditionals from del_index. Return value to be used in get_sub_type(), to then be inputted
+    into get_numeric()
+    '''
+    pass
 
 def del_index(lst: list) -> None:
 
@@ -114,7 +121,3 @@ def del_index(lst: list) -> None:
     elif '' not in dataset.columns[0] and not has_expected_values and not is_unique:
 
         return 'No Index'
-    
-    '''
-    Might have to make two seperate functions - one for checking if index exists, one for deleting.
-    '''

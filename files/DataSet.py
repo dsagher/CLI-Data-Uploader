@@ -14,7 +14,7 @@ class DataSet:
     def add_decimal_values(self, values):
         self.decimal_lst.append(values)
     
-    
+    # Need this for serial
     def row_count():
         pass
     
@@ -24,6 +24,7 @@ class DataSet:
     def shape():
         pass
 
+    # Could enumerate here 
     @property   
     def columns(self):
         return self.column_lst
@@ -36,9 +37,6 @@ class DataSet:
     def dicts(self):
         return self.dicts
     
-    
-    def decimals(self):
-        return self.decimals
     
 
     

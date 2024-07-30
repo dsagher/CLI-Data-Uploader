@@ -2,6 +2,7 @@ from convert import get_type, dataset, detect_index
 import csv
 from pprint import pprint
 from re import fullmatch
+from typing import Optional
 
 
 def get_boolean(key, values):
@@ -9,10 +10,7 @@ def get_boolean(key, values):
 
 def get_numeric(key: str, value: set, precision_decision: list) -> str:
 
-
-    # Initialize
     dct = dict()
-    lst = list()
     
     # Change value from set to list to iterate
     dct[key] = list(value)
@@ -39,7 +37,7 @@ def get_numeric(key: str, value: set, precision_decision: list) -> str:
         
     return result
 
-def get_index() -> str:
+def get_index() -> Optional[str]:
 
     result = f'index SMALLSERIAL,' if dataset.length <= 32767 else \
                 f'index SERIAL' if dataset.length <= 2147483647 else \
@@ -47,8 +45,7 @@ def get_index() -> str:
     
     return result
         
-def get_char(key, values):
-
+def get_char(key: str, values: set) -> str:
 
     mx = max(len(i) for i in values)
 
@@ -171,19 +168,19 @@ def generate_ddl(response: list[dict]) -> list:
         for field in dataset.columns:
             if dct['column'] == field and dct['type'] == 'Numeric':
                 
-                result.append(get_numeric(field, dataset.dicts[field], precision_decision))
-                # pass
+                # result.append(get_numeric(field, dataset.dicts[field], precision_decision))
+                pass
 
             elif dct['column'] == field and dct['type'] == 'Character':
                 # pass
                 result.append(get_char(field, dataset.dicts[field]))
 
-            # elif dct['column'] == field and dct['type'] == 'Boolean':
-
+            elif dct['column'] == field and dct['type'] == 'Boolean':
+                pass
             #     result.append(get_boolean(field, dataset.dicts[field]))
             elif dct['column'] == field and dct['type'] == 'Date':
-                
-                result.append(get_date(field, dataset.dicts[field]))
+                pass
+                # result.append(get_date(field, dataset.dicts[field]))
 
     return result
 

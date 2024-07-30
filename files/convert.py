@@ -7,17 +7,17 @@ with open('input/taylor_swift_spotify.csv', 'r') as infile:
     reader = csv.DictReader(infile, lineterminator='')  
     lst = list(reader)
 
-def extract_unique_values(lst: list) -> set: 
+def extract_unique_values(lst: list[dict]) -> set[str]: 
 
     '''
     This function takes list of dictionaries. Each dictionary is unpacked to collect unique key-value pairs.
     It identifies boolean columns and stores unique values for each key.
 
     Args:
-    *args: Multiple lists of dictionaries.
+    lists of dictionaries.
 
     Returns:
-    A dictionary where keys are the column names and values are sets of unique values for each column.
+    
     '''
 
     collect = set()
@@ -38,7 +38,7 @@ def extract_unique_values(lst: list) -> set:
             boolean_columns.add(k)
 
     # Step 3: Create a dictionary to store unique values for each key
-    unique_values = {k: set() for k in keys}
+    unique_values: dict = {k: set() for k in keys}
 
     # Step 4: Populate unique_values with unique key-value pairs
     for key, value in collect:
@@ -54,13 +54,12 @@ def extract_unique_values(lst: list) -> set:
     
     return boolean_columns
 
+def get_type(lst: list[dict]) -> list[dict]:
 
-def get_type(lst_of_dicts: list) -> list:
-
-    first = lst_of_dicts[0]
+    first = lst[0]
     result = list()
 
-    boolean_columns = extract_unique_values(lst_of_dicts)
+    boolean_columns = extract_unique_values(lst)
     
     for i in first:   
         
@@ -82,20 +81,10 @@ def get_type(lst_of_dicts: list) -> list:
              
     return result
 
-# print(get_type(lst))
-def detect_index():
-    
-    ''' 
-    Bring over conditionals from del_index. Return value to be used in get_sub_type(), to then be inputted
-    into get_numeric()
+def detect_index(lst: list[dict]) -> Optional[str]:
     '''
-
-
-
-
-
-def detect_index(lst: list) -> Optional[str]:
-
+    Remove input from this function and put it in main. 
+    '''
     
     is_in_all_dcts = all('' in dct for dct in lst)
     
@@ -109,7 +98,7 @@ def detect_index(lst: list) -> Optional[str]:
         is_unique = len(unique_values) == len(values)
         
         if has_expected_values and is_unique:
-            # Confirm with the user
+            # Confirm with the user - Move this elsewhere
             answer = input('Empty column detected. Would you like to delete? (yes/y to confirm) ')
             if answer.lower() in ['yes', 'y']:
 
@@ -119,8 +108,7 @@ def detect_index(lst: list) -> Optional[str]:
 
         return 'No Index'
 
-
-def del_index(lst: list) -> None:
+def del_index(lst: list[dict]) -> None:
 
     index = dataset.columns.index('')
     dataset.columns.pop(index)
@@ -130,6 +118,3 @@ def del_index(lst: list) -> None:
             del dct['']
     
     print('Index deleted.')
-
-
-

@@ -13,16 +13,6 @@ class DataSet:
 
     def add_decimal_values(self, values):
         self.decimal_lst.append(values)
-    
-    # Need this for serial
-    def row_count():
-        pass
-    
-    def column_count():
-        pass
-
-    def shape():
-        pass
 
     # Could enumerate here 
     @property   
@@ -32,10 +22,22 @@ class DataSet:
     @property
     def values(self):
         return self.unique_lst
-    
- 
+
+    @property
     def dicts(self):
-        return self.dicts
+        return self._dicts
+    
+    @dicts.setter
+    def dicts(self, value):
+        self._dicts = value
+    
+    @property
+    def length(self):
+        return self._length
+    
+    @length.setter
+    def length(self, value):
+        self._length = value
     
     
 

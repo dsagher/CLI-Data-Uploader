@@ -7,7 +7,7 @@ from re import fullmatch
 def get_boolean(key, values):
     pass
 
-def get_numeric(key: str, value: set, precision_decision: list, index: bool) -> str:
+def get_numeric(key: str, value: set, precision_decision: list) -> str:
 
 
     # Initialize
@@ -47,7 +47,6 @@ def get_index() -> str:
     
     return result
         
-
 def get_char(key, values):
 
 
@@ -64,8 +63,7 @@ def get_char(key, values):
 
     return result
 
-
-def get_date(key, values):
+def get_date(key: str, values: set) -> str:
     
     try: 
         date_lst = list()
@@ -73,10 +71,16 @@ def get_date(key, values):
         unformatted_lst = list()
         timestamp_lst = list()
 
+        # YYYY-MM-DD or YY-M-D
         date_pattern_1 = r'\d{2,4}[-/\.]\d{1,2}[-/\.]\d{1,2}'
+
+        # DD-MM-YYYY or D-M-YY
         date_pattern_2 = r'\d{1,2}[-/\.]\d{1,2}[-/\.]\d{2,4}'
+
+        # HH:MM:SS
         time_pattern = r'\d{2}:\d{2}:\d{2}'
 
+        # Iterate through values list and pass values into respective lists, including a bucket for formats that don't fit.
         for v in list(values):
             
             if fullmatch(date_pattern_1, v) or fullmatch(date_pattern_2, v):
@@ -91,28 +95,56 @@ def get_date(key, values):
             else:
                 unformatted_lst.append(v)
 
-
-        if date_lst and unformatted_lst:
-            raise ValueError(f'{key} DATE Inconsistent format: {unformatted_lst}')
-        elif timestamp_lst and unformatted_lst:
-            raise ValueError(f'{key} TIMESTAMP Inconsistent format: {unformatted_lst}')
-        elif time_lst and unformatted_lst:
-            raise ValueError(f'{key} TIME Inconsistent format: {unformatted_lst}')
-        elif date_lst and len(date_lst) == len(values):
+        # Set result to appropriate DDL statement
+        if unformatted_lst: # Recognize incorrect formats
+            if date_lst:
+                raise ValueError(f'{key} DATE Incorrect format: {unformatted_lst}')
+            elif timestamp_lst:
+                raise ValueError(f'{key} TIMESTAMP Incorrect format: {unformatted_lst}')
+            elif time_lst:
+                raise ValueError(f'{key} TIME Incorrect format: {unformatted_lst}')
+            else:
+                raise ValueError(f'{key} Unknown Format {unformatted_lst}')
+        
+        elif (date_lst and (time_lst or timestamp_lst)) or (timestamp_lst and time_lst):
+            # Recognize correct but inconsistent formats
+            raise ValueError(f'{key} Inconsistent format: {date_lst[0] if date_lst else ""} \
+                                                          {time_lst[0] if time_lst else ""} \
+                                                          {timestamp_lst[0] if timestamp_lst else ""}')
+        
+        
+        # If lsts exists and all the values made it through the conditional 
+        elif date_lst and len(date_lst) == len(values): 
             result = f'{key} DATE,'
         elif timestamp_lst and len(timestamp_lst) == len(values):
             result = f'{key} TIMESTAMP,'
         elif time_lst and len(time_lst) == len(values):
             result = f'{key} TIME,'
+        else:
+            result = f'{key} Unknown Format'                   
 
     except ValueError as e:
-        result = e
+        result = str(e)
 
     return result
    
-def get_sub_type(response: list[dict]) -> list:
+def generate_ddl(response: list[dict]) -> list:
 
+    '''
+    This function takes in a list of dictionaries from get_type() in convert.py. The input is classifications of datatypes
+    'Numeric', 'Boolean', 'Character', and 'Date. The classifications are then passed into their respective functions which 
+    determine the correct datatype based on a series of conditionals.
+
+    Input: ex. [{'column':'name', 'type': 'Character'}]
+    
+    Returns: A list of SQL DDL (Data Definition Language) with the appropriate datatypes per each column.
+    
+    '''
+
+    # Final DDL statement list
     result = list()
+
+    # Set of columns with decimals
     precision_lst = set()
 
     for i, k in enumerate(dataset.dicts):
@@ -120,28 +152,31 @@ def get_sub_type(response: list[dict]) -> list:
             if fullmatch(r'-?\d+\.\d+', v):
                 precision_lst.add(f'{k}')
 
-    # print(precision_lst)
-    # precision_decision = input(f'Which fields require precision? ').split(' ')
+    # Display list of columns with decimals and prompt user to choose which columns require precision
+    print(precision_lst)
+    precision_decision = input(f'Which fields require precision? ').split(' ')
 
 
-    # index_status = detect_index(lst)
+    # Detect index in dataset and prompt user to add one. 
+    index_status = detect_index(lst)
+
+    if index_status == 'No Index':
+        want_index = input('No index detected. Would you like to add one? (y/yes): ')
+        result.append(get_index()) if want_index.lower() in ['y', 'yes'] else None
+
     
-    # if index_status == 'No Index':
-    #     want_index = input('No index detected. Would you like to add one? (y/yes): ')
-    #     index = result.append(get_index()) if want_index.lower() in ['y', 'yes'] else None
-
-    
-
+    # Iterate through {'column': 'x', 'type': 'y'} response from get_type() and column in dataset.columns
+    # pass values into respective functions based on classification to determine the each column's datatype
     for dct in response: 
         for field in dataset.columns:
             if dct['column'] == field and dct['type'] == 'Numeric':
                 
-                # result.append(get_numeric(field, dataset.dicts[field], precision_decision, index))
-                pass
+                result.append(get_numeric(field, dataset.dicts[field], precision_decision))
+                # pass
 
             elif dct['column'] == field and dct['type'] == 'Character':
-                pass
-                # result.append(get_char(field, dataset.dicts[field]))
+                # pass
+                result.append(get_char(field, dataset.dicts[field]))
 
             # elif dct['column'] == field and dct['type'] == 'Boolean':
 
@@ -152,9 +187,9 @@ def get_sub_type(response: list[dict]) -> list:
 
     return result
 
-with open('input/ed_sheeran_spotify.csv', 'r') as infile:
+with open('input/taylor_swift_spotify.csv', 'r') as infile:
     reader = csv.DictReader(infile, lineterminator='')  
     lst = list(reader)
 
 response = get_type(lst)
-print(get_sub_type(response))
+print(generate_ddl(response))

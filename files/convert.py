@@ -1,6 +1,7 @@
 import re
 from DataSet import dataset
 import csv
+from typing import Optional
 
 with open('input/taylor_swift_spotify.csv', 'r') as infile:
     reader = csv.DictReader(infile, lineterminator='')  
@@ -49,10 +50,10 @@ def extract_unique_values(lst: list) -> set:
         dataset.add_unique_values(values)
 
     dataset.dicts = unique_values
+    dataset.length = len(lst)
     
     return boolean_columns
 
-# extract_unique_values(lst)
 
 def get_type(lst_of_dicts: list) -> list:
 
@@ -64,10 +65,10 @@ def get_type(lst_of_dicts: list) -> list:
     for i in first:   
         
 
-        if re.fullmatch(r'-?(?:\d+)?(?:\.\d+)?',first[i]) and i not in boolean_columns:
+        if re.fullmatch(r'-?\d+(\.\d+)?([eE][-+]?\d+)?',first[i]) and i not in boolean_columns:
             result.append({'column': i, 'type': 'Numeric'})    
 
-        elif re.fullmatch(r'(?:\d{2})?\d{1,2}-\d{1,2}-\d{2}(?:\d{2})?', first[i]):
+        elif re.fullmatch(r'(?:\d{2})?\d{1,2}[-/]\d{1,2}[-/]\d{2}(?:\d{2})?', first[i]):
             result.append({'column': i, 'type': 'Date'}) 
             
         elif i in boolean_columns:
@@ -81,43 +82,54 @@ def get_type(lst_of_dicts: list) -> list:
              
     return result
 
+# print(get_type(lst))
 def detect_index():
     
     ''' 
     Bring over conditionals from del_index. Return value to be used in get_sub_type(), to then be inputted
     into get_numeric()
     '''
-    pass
+
+
+
+
+
+def detect_index(lst: list) -> Optional[str]:
+
+    
+    is_in_all_dcts = all('' in dct for dct in lst)
+    
+    if is_in_all_dcts:
+
+        values = [dct.get('') for dct in lst]
+        numbers = [str(i) for i in range(15)]
+        has_expected_values = values[:15] == numbers
+
+        unique_values = set(values)
+        is_unique = len(unique_values) == len(values)
+        
+        if has_expected_values and is_unique:
+            # Confirm with the user
+            answer = input('Empty column detected. Would you like to delete? (yes/y to confirm) ')
+            if answer.lower() in ['yes', 'y']:
+
+                del_index(lst)
+
+    elif '' not in dataset.columns and not is_in_all_dcts:
+
+        return 'No Index'
+
 
 def del_index(lst: list) -> None:
 
-    # Add functionality to add index if not exists
-
-    if dataset.columns and '' in dataset.columns:
-        index = dataset.columns.index('')
-
-        is_in_all_dcts = all('' in dct for dct in lst)
-        
-        if is_in_all_dcts:
-
-            values = [dct.get('') for dct in lst]
-            numbers = [str(i) for i in range(15)]
-            has_expected_values = values[:15] == numbers
-
-            unique_values = set(values)
-            is_unique = len(unique_values) == len(values)
-            
-            if has_expected_values and is_unique:
-                # Confirm with the user
-                answer = input('Empty column detected. Would you like to delete? (yes/y to confirm) ')
-                if answer.lower() in ['yes', 'y']:
-                    # Remove the empty string column from DataSet class
-                    dataset.columns.pop(index)
-                    # Remove the empty string column from each dictionary in the list
-                    for dct in lst:
-                        if '' in dct:
-                            del dct['']
+    index = dataset.columns.index('')
+    dataset.columns.pop(index)
+    # Remove the empty string column from each dictionary in the list
+    for dct in lst:
+        if '' in dct:
+            del dct['']
     
-    elif '' not in dataset.columns[0] and not has_expected_values and not is_unique:
+    print('Index deleted.')
 
-        return 'No Index'
+
+

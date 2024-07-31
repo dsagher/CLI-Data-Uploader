@@ -10,7 +10,7 @@ from re import fullmatch
 
 
 
-def generate_ddl(response: list[dict], lst) -> list:
+def generate_ddl(response: list[dict], lst: list[dict], want_index: bool, precision_decision: list) -> list:
 
     '''
     This function takes in a list of dictionaries from get_type() in convert.py. The input is classifications of datatypes
@@ -26,27 +26,9 @@ def generate_ddl(response: list[dict], lst) -> list:
     # Final DDL statement list
     result = list()
 
-    # Set of columns with decimals
-    precision_lst = set()
+    # Add index to list before iterating through fields
+    result.append(get_index()) if want_index == True else None
 
-    for i, k in enumerate(dataset.dicts):
-        for v in dataset.dicts[k]:
-            if fullmatch(r'-?\d+\.\d+', v):
-                precision_lst.add(f'{k}')
-
-    # Display list of columns with decimals and prompt user to choose which columns require precision
-    print(precision_lst)
-    precision_decision = input(f'Which fields require precision? ').split(' ')
-
-
-    # Detect index in dataset and prompt user to add one. 
-    index_status = detect_index(lst)
-
-    if index_status == 'No Index':
-        want_index = input('No index detected. Would you like to add one? (y/yes): ')
-        result.append(get_index()) if want_index.lower() in ['y', 'yes'] else None
-
-    
     # Iterate through {'column': 'x', 'type': 'y'} response from get_type() and column in dataset.columns
     # pass values into respective functions based on classification to determine the each column's datatype
     for dct in response: 
@@ -54,17 +36,17 @@ def generate_ddl(response: list[dict], lst) -> list:
             if dct['column'] == field and dct['type'] == 'Numeric':
                 
                 result.append(get_numeric(field, dataset.dicts[field], precision_decision))
-                # pass
-
+                
             elif dct['column'] == field and dct['type'] == 'Character':
-                # pass
+                
                 result.append(get_char(field, dataset.dicts[field]))
 
             elif dct['column'] == field and dct['type'] == 'Boolean':
-                # pass
+                
                 result.append(get_boolean(field, dataset.dicts[field]))
+
             elif dct['column'] == field and dct['type'] == 'Date':
-                # pass
+                
                 result.append(get_date(field, dataset.dicts[field]))
 
     return result

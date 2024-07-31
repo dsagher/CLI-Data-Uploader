@@ -1,11 +1,5 @@
 import re
 from DataSet import dataset
-import csv
-from typing import Optional
-
-with open('input/taylor_swift_spotify.csv', 'r') as infile:
-    reader = csv.DictReader(infile, lineterminator='')  
-    lst = list(reader)
 
 def extract_values(lst: list[dict]) -> set[str]: 
 
@@ -81,14 +75,15 @@ def get_type(lst: list[dict]) -> list[dict]:
              
     return result
 
-def detect_index(lst: list[dict]) -> Optional[str]:
+def detect_index(lst: list[dict]) -> bool:
     '''
     Remove input from this function and put it in main. 
     '''
     
-    is_in_all_dcts = all('' in dct for dct in lst)
+    is_first_key_empty = all(len(dct) > 0 and list(dct.keys())[0] == '' for dct in lst)
+
     
-    if is_in_all_dcts:
+    if is_first_key_empty:
 
         values = [dct.get('') for dct in lst]
         numbers = [str(i) for i in range(15)]
@@ -98,15 +93,13 @@ def detect_index(lst: list[dict]) -> Optional[str]:
         is_unique = len(unique_values) == len(values)
         
         if has_expected_values and is_unique:
+
+            return True
             # Confirm with the user - Move this elsewhere
-            answer = input('Empty column detected. Would you like to delete? (yes/y to confirm) ')
-            if answer.lower() in ['yes', 'y']:
 
-                del_index(lst)
+    elif '' not in dataset.columns and not is_first_key_empty:
 
-    elif '' not in dataset.columns and not is_in_all_dcts:
-
-        return 'No Index'
+        return False
 
 def del_index(lst: list[dict]) -> None:
 

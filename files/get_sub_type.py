@@ -3,9 +3,12 @@ from re import fullmatch
 from typing import Optional
 
 
-def get_boolean(key, values):
-    pass
+def get_boolean(key: str, values: set) -> str:
+    
+    result = f'{key} BOOLEAN,'
 
+    return result
+    
 def get_numeric(key: str, value: set, precision_decision: list) -> str:
 
     dct = dict()
@@ -37,7 +40,7 @@ def get_numeric(key: str, value: set, precision_decision: list) -> str:
 
 def get_index() -> Optional[str]:
 
-    result = f'index SMALLSERIAL,' if dataset.length <= 32767 else \
+    result =    f'index SMALLSERIAL,' if dataset.length <= 32767 else \
                 f'index SERIAL' if dataset.length <= 2147483647 else \
                 f'index BIGSERIAL' if dataset.length <= 9223372036854775807 else None
     
@@ -53,7 +56,7 @@ def get_char(key: str, values: set) -> str:
     if same:
         result = f'{key} CHAR{[lengths[0]]},'
     else:
-        result = f'{key} VARCHAR{[mx]},' if mx < 65535 else \
+        result = f'{key} VARCHAR,' if mx < 65535 else \
                  f'{key} TEXT'
 
     return result
@@ -123,68 +126,3 @@ def get_date(key: str, values: set) -> str:
 
     return result
    
-# def generate_ddl(response: list[dict], lst) -> list:
-
-#     '''
-#     This function takes in a list of dictionaries from get_type() in convert.py. The input is classifications of datatypes
-#     'Numeric', 'Boolean', 'Character', and 'Date. The classifications are then passed into their respective functions which 
-#     determine the correct datatype based on a series of conditionals.
-
-#     Input: ex. [{'column':'name', 'type': 'Character'}]
-    
-#     Returns: A list of SQL DDL (Data Definition Language) with the appropriate datatypes per each column.
-    
-#     '''
-
-#     # Final DDL statement list
-#     result = list()
-
-#     # Set of columns with decimals
-#     precision_lst = set()
-
-#     for i, k in enumerate(dataset.dicts):
-#         for v in dataset.dicts[k]:
-#             if fullmatch(r'-?\d+\.\d+', v):
-#                 precision_lst.add(f'{k}')
-
-#     # Display list of columns with decimals and prompt user to choose which columns require precision
-#     print(precision_lst)
-#     precision_decision = input(f'Which fields require precision? ').split(' ')
-
-
-#     # Detect index in dataset and prompt user to add one. 
-#     index_status = detect_index(lst)
-
-#     if index_status == 'No Index':
-#         want_index = input('No index detected. Would you like to add one? (y/yes): ')
-#         result.append(get_index()) if want_index.lower() in ['y', 'yes'] else None
-
-    
-#     # Iterate through {'column': 'x', 'type': 'y'} response from get_type() and column in dataset.columns
-#     # pass values into respective functions based on classification to determine the each column's datatype
-#     for dct in response: 
-#         for field in dataset.columns:
-#             if dct['column'] == field and dct['type'] == 'Numeric':
-                
-#                 # result.append(get_numeric(field, dataset.dicts[field], precision_decision))
-#                 pass
-
-#             elif dct['column'] == field and dct['type'] == 'Character':
-#                 # pass
-#                 result.append(get_char(field, dataset.dicts[field]))
-
-#             elif dct['column'] == field and dct['type'] == 'Boolean':
-#                 pass
-#             #     result.append(get_boolean(field, dataset.dicts[field]))
-#             elif dct['column'] == field and dct['type'] == 'Date':
-#                 pass
-#                 # result.append(get_date(field, dataset.dicts[field]))
-
-#     return result
-
-# with open('input/taylor_swift_spotify.csv', 'r') as infile:
-#     reader = csv.DictReader(infile, lineterminator='')  
-#     lst = list(reader)
-
-# response = get_type(lst)
-# print(generate_ddl(response))

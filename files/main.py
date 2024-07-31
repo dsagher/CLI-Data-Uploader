@@ -1,6 +1,8 @@
 import csv
-from convert import get_type
+from convert import get_type, detect_index, del_index
 from generate_ddl import generate_ddl
+from get_sub_type import dataset
+from re import fullmatch
 import argparse
 
 '''
@@ -25,31 +27,45 @@ push()- will use SQLalchemy to push to a Postgres server.
 
 def main():
 
+    # Open file and assign to lst as list[dicts]
     file = input('What is the file path? ')
-
     with open(file, 'r') as infile:
         reader = csv.DictReader(infile, lineterminator='')  
         lst = list(reader)
 
-    response = get_type(lst)
-    print(generate_ddl(response, lst))
+
+    # Get type classifications NUMERIC, CHARACTER, DATE, or BOOLEAN
+    response: list[dict] = get_type(lst)
+
+    # Get list of columns with decimal values that require exact precision 
+    precision_lst = set()
+
+    for k in dataset.dicts:
+        for v in dataset.dicts[k]:
+            if fullmatch(r'-?\d+\.\d+', v):
+                precision_lst.add(f'{k}')
+
+    if precision_lst:
+        print(precision_lst)
+        precision_decision: list = input(f'Which fields require precision? ').split(' ')
+    else:
+        precision_decision = None
+
+    # Detect index in dataset and prompt user to delete it if present, and add one if not
+    index_status: bool = detect_index(lst)
+
+    if index_status == True:
+        answer = input('Index column detected. Would you like to delete? (yes/y to confirm) ')
+        if answer.lower() in ['yes', 'y']:
+            del_index(lst)
+        want_index = False
+    else:
+        answer = input('No index detected. Would you like to add one? (yes/y to confirm) ')
+        want_index = True if answer.lower() in ['yes', 'y'] else False
+
+    
+    print(generate_ddl(response, lst, want_index, precision_decision))
     
 
-
-
-
-
-
-
-
-
-# def parse():
-#     parser = argparse.ArgumentParser(description="Convert a dataset to SQL DDL and upload to PostgreSQL.")
-#     parser.add_argument('--host', default='localhost', type=str, help='Database host.')
-#     parser.add_argument('--port', default=5432, type=int, help='Database port.')
-#     return parser.parse_args()
-
-    
-# summary = input('Would you like a summary? ')
-
-main()
+if __name__ == '__main__':
+    main()

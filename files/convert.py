@@ -7,7 +7,7 @@ with open('input/taylor_swift_spotify.csv', 'r') as infile:
     reader = csv.DictReader(infile, lineterminator='')  
     lst = list(reader)
 
-def extract_unique_values(lst: list[dict]) -> set[str]: 
+def extract_values(lst: list[dict]) -> set[str]: 
 
     '''
     This function takes list of dictionaries. Each dictionary is unpacked to collect unique key-value pairs.
@@ -59,7 +59,7 @@ def get_type(lst: list[dict]) -> list[dict]:
     first = lst[0]
     result = list()
 
-    boolean_columns = extract_unique_values(lst)
+    boolean_columns = extract_values(lst)
     
     for i in first:   
         

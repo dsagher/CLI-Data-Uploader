@@ -1,6 +1,8 @@
 import csv
-from convert import del_index, get_type
+from convert import get_type
+from generate_ddl import generate_ddl
 import argparse
+
 '''
 
 main() will call arg to ask user for file and arguments. 
@@ -29,15 +31,23 @@ def main():
         reader = csv.DictReader(infile, lineterminator='')  
         lst = list(reader)
 
-    get_type(lst)
-    lst = del_index(lst)
+    response = get_type(lst)
+    print(generate_ddl(response, lst))
+    
 
 
-def parse():
-    parser = argparse.ArgumentParser(description="Convert a dataset to SQL DDL and upload to PostgreSQL.")
-    parser.add_argument('--host', default='localhost', type=str, help='Database host.')
-    parser.add_argument('--port', default=5432, type=int, help='Database port.')
-    return parser.parse_args()
+
+
+
+
+
+
+
+# def parse():
+#     parser = argparse.ArgumentParser(description="Convert a dataset to SQL DDL and upload to PostgreSQL.")
+#     parser.add_argument('--host', default='localhost', type=str, help='Database host.')
+#     parser.add_argument('--port', default=5432, type=int, help='Database port.')
+#     return parser.parse_args()
 
     
 # summary = input('Would you like a summary? ')

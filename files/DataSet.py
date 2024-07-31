@@ -11,10 +11,8 @@ class DataSet:
     def add_unique_values(self, unique_values):
         self.unique_lst.append(unique_values)
 
-    def add_decimal_values(self, values):
-        self.decimal_lst.append(values)
 
-    # Could enumerate here 
+
     @property   
     def columns(self):
         return self.column_lst
@@ -38,12 +36,5 @@ class DataSet:
     @length.setter
     def length(self, value):
         self._length = value
-    
-    
-
-    
-
 
 dataset = DataSet()
-    
-

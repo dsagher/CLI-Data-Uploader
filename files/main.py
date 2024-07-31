@@ -3,7 +3,7 @@ from convert import get_type, detect_index, del_index
 from generate_ddl import generate_ddl
 from get_sub_type import dataset
 from re import fullmatch
-import argparse
+from push import sql_push
 
 '''
 
@@ -58,13 +58,16 @@ def main():
         answer = input('Index column detected. Would you like to delete? (yes/y to confirm) ')
         if answer.lower() in ['yes', 'y']:
             del_index(lst)
-        want_index = False
+        else:
+            del_index(lst)
+            want_index = True
     else:
         answer = input('No index detected. Would you like to add one? (yes/y to confirm) ')
         want_index = True if answer.lower() in ['yes', 'y'] else False
 
     
-    print(generate_ddl(response, lst, want_index, precision_decision))
+    column_lst = generate_ddl(response, want_index, precision_decision)
+    sql_push(column_lst)
     
 
 if __name__ == '__main__':

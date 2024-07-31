@@ -5,12 +5,7 @@ from get_sub_type import (dataset,
                           get_index, 
                           get_numeric)
 
-from convert import detect_index
-from re import fullmatch
-
-
-
-def generate_ddl(response: list[dict], lst: list[dict], want_index: bool, precision_decision: list) -> list:
+def generate_ddl(response: list[dict], want_index: bool, precision_decision: list) -> list:
 
     '''
     This function takes in a list of dictionaries from get_type() in convert.py. The input is classifications of datatypes
@@ -50,4 +45,3 @@ def generate_ddl(response: list[dict], lst: list[dict], want_index: bool, precis
                 result.append(get_date(field, dataset.dicts[field]))
 
     return result
-

@@ -11,8 +11,6 @@ class DataSet:
     def add_unique_values(self, unique_values):
         self.unique_lst.append(unique_values)
 
-
-
     @property   
     def columns(self):
         return self.column_lst

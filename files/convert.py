@@ -95,7 +95,6 @@ def detect_index(lst: list[dict]) -> bool:
         if has_expected_values and is_unique:
 
             return True
-            # Confirm with the user - Move this elsewhere
 
     elif '' not in dataset.columns and not is_first_key_empty:
 
@@ -109,5 +108,3 @@ def del_index(lst: list[dict]) -> None:
     for dct in lst:
         if '' in dct:
             del dct['']
-    
-    print('Index deleted.')

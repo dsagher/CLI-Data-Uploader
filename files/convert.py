@@ -104,6 +104,7 @@ def del_index(lst: list[dict]) -> None:
 
     index = dataset.columns.index('')
     dataset.columns.pop(index)
+    dataset.dicts.pop('')
     # Remove the empty string column from each dictionary in the list
     for dct in lst:
         if '' in dct:

@@ -10,12 +10,13 @@ def sql_push(column_lst):
     port = input('Port: ')
     table_name = input('Table Name: ')
 
+    
     conn = ps.connect(host=host, dbname=dbname, user=user, 
-                    password=password, port=port)
+                password=password, port=port)
+    cur = conn.cursor()
+
     
     column_definitions = ", ".join(column_lst)
-
-    cur = conn.cursor()
 
     create_sql = f'''
                 --sql
@@ -26,12 +27,11 @@ def sql_push(column_lst):
     try:
         cur.execute(create_sql)
 
-        for key, value in dataset.dicts.items():
-        # Assuming 'key' is a column and 'value' is a list of tuples or lists of data to insert
-            insert_values = ', '.join([str(v) for v in value])
-            insert_statement = f'INSERT INTO {table_name} ({key}) VALUES ({insert_values})'
+        # Need to add placeholders
+        for key in dataset.dicts:
+            value_lst = [(v,) for v in dataset.dicts[key]]
+            cur.executemany(f'INSERT INTO {table_name} ({key}) VALUES (%s)', value_lst)
 
-        cur.execute(insert_statement)
         conn.commit()
 
 

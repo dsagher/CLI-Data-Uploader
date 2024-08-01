@@ -33,10 +33,10 @@ def main():
         reader = csv.DictReader(infile, lineterminator='')  
         lst = list(reader)
 
-
+    
     # Get type classifications NUMERIC, CHARACTER, DATE, or BOOLEAN
     response: list[dict] = get_type(lst)
-
+    
     # Get list of columns with decimal values that require exact precision 
     precision_lst = set()
 
@@ -58,6 +58,7 @@ def main():
         answer = input('Index column detected. Would you like to delete? (yes/y to confirm) ')
         if answer.lower() in ['yes', 'y']:
             del_index(lst)
+            want_index = False
         else:
             del_index(lst)
             want_index = True
@@ -65,7 +66,7 @@ def main():
         answer = input('No index detected. Would you like to add one? (yes/y to confirm) ')
         want_index = True if answer.lower() in ['yes', 'y'] else False
 
-    
+    print(dataset.dicts)
     column_lst = generate_ddl(response, want_index, precision_decision)
     sql_push(column_lst)
     

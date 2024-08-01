@@ -54,7 +54,7 @@ def get_char(key: str, values: set) -> str:
     same = all(v == lengths[0] for v in lengths)
 
     if same:
-        result = f'{key} CHAR{[lengths[0]]}'
+        result = f'{key} CHAR({lengths[0]})'
     else:
         result = f'{key} VARCHAR' if mx < 65535 else \
                  f'{key} TEXT'

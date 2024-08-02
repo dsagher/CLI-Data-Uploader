@@ -38,7 +38,7 @@ def generate_ddl(response: list[dict], want_index: bool, precision_decision: lis
 
             elif dct['column'] == field and dct['type'] == 'Boolean':
                 
-                result.append(get_boolean(field, dataset.dicts[field]))
+                result.append(get_boolean(field))
 
             elif dct['column'] == field and dct['type'] == 'Date':
                 

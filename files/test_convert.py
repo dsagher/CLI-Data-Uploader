@@ -1,5 +1,4 @@
-import pytest
-from convert import get_type, extract_unique_values
+from convert import get_type, extract_values
 
 def test_char():
     lst_of_dicts = [{'hello':'123'}, {'goodbye':'456'}]
@@ -91,10 +90,10 @@ def test_bool():
     lst_of_dicts = [{'hello':'t'},{'hello':'F'}]
     assert get_type(lst_of_dicts) == [{'column': 'hello', 'type': 'Boolean'}]
 
-def test_extract_unique_values():
+def test_extract_values():
 
     lst_of_dicts = [{'hello':'1'},{'hello':'0'},{'hello':'1'},{'hello':'0'}]
-    assert extract_unique_values(lst_of_dicts) == {'hello'}
+    assert extract_values(lst_of_dicts) == {'hello'}
 
     lst_of_dicts = [{'hello':'1'},{'hello':'0'},{'hey':'1'},{'hey':'1'}, {'who':'3'}]
-    assert extract_unique_values(lst_of_dicts) == {'hello','hey'}
+    assert extract_values(lst_of_dicts) == {'hello','hey'}

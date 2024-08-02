@@ -2,7 +2,6 @@ from convert import dataset
 from re import fullmatch
 from typing import Optional
 
-
 def get_boolean(key: str) -> str:
     '''
     params:

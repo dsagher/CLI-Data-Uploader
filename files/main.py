@@ -1,4 +1,4 @@
-import csv
+from csv import DictReader
 from convert import get_type, detect_index, del_index
 from generate_ddl import generate_ddl
 from get_sub_type import dataset
@@ -11,11 +11,11 @@ def main() -> None:
     This application takes in a CSV dataset, determines which datatypes to use, generates a SQL DDL statement,
     and pushes to a user-specified database. 
     '''
-    
+
     # Open file and assign to lst as list[dicts]
     file = input('What is the file path? ')
     with open(file, 'r') as infile:
-        reader = csv.DictReader(infile, lineterminator='')  
+        reader = DictReader(infile, lineterminator='')  
         lst: list[dict] = list(reader)
 
     

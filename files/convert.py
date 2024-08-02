@@ -1,29 +1,29 @@
-import re
+from re import fullmatch, IGNORECASE
 from DataSet import dataset
 
 def extract_values(lst: list[dict]) -> set[str]: 
 
     '''
-    This function takes list of dictionaries. Each dictionary is unpacked to collect unique key-value pairs.
-    It identifies boolean columns and stores unique values for each key.
+    This function determines if a column only contains boolean values and adds it to a set to be used in get_type().
+    It also populates the DataSet class instance that is used elsewhere in the code. 
 
-    Args:
-    lists of dictionaries.
+    params:
+        lst - list of dictionaries of the original csv dataset
 
-    Returns:
-    
+    output:
+        boolean_columns - a set of column names whose values are exclusively boolean 
     '''
 
     collect = set()
     keys = set()
     
-    # Step 1: Collect unique key-value pairs and unique keys
+    # Collect unique key-value pairs and unique keys
     for d in lst:
         for k,v in d.items():   
             collect.add((k,v))
             keys.add(k)
 
-    # Step 2: Identify boolean columns - Set comprehension
+    # Identify boolean columns
     boolean_columns = set()
 
     for k in keys:
@@ -31,14 +31,14 @@ def extract_values(lst: list[dict]) -> set[str]:
         if values.issubset({'0', '1', 'true', 'false', 't', 'f'}):
             boolean_columns.add(k)
 
-    # Step 3: Create a dictionary to store unique values for each key
+    
     unique_values: dict = {k: set() for k in keys}
 
-    # Step 4: Populate unique_values with unique key-value pairs
+    # Populate unique_values with unique key-value pairs
     for key, value in collect:
         unique_values[key].add(value)
 
-    # Step 5. Add keys and Values to Class Instance, and return True + column names for boolean columns.
+    # Add keys and values to Class Instance
     for key, values in unique_values.items():
         dataset.add_columns(key)
         dataset.add_unique_values(values)
@@ -50,6 +50,16 @@ def extract_values(lst: list[dict]) -> set[str]:
 
 def get_type(lst: list[dict]) -> list[dict]:
 
+    '''
+    This function outputs a list of dictionaries of column names and a classification of their datatype. 
+    
+    params:
+        lst - list of dictionaries of the original csv dataset
+
+    output:
+        result -  a list of dictionaries containing {'column: column_name, 'type': 'datatype'}
+    '''
+    
     first = lst[0]
     result = list()
 
@@ -58,16 +68,16 @@ def get_type(lst: list[dict]) -> list[dict]:
     for i in first:   
         
 
-        if re.fullmatch(r'-?\d+(\.\d+)?([eE][-+]?\d+)?',first[i]) and i not in boolean_columns:
+        if fullmatch(r'-?\d+(\.\d+)?([eE][-+]?\d+)?',first[i]) and i not in boolean_columns:
             result.append({'column': i, 'type': 'Numeric'})    
 
-        elif re.fullmatch(r'(?:\d{2})?\d{1,2}[-/]\d{1,2}[-/]\d{2}(?:\d{2})?', first[i]):
+        elif fullmatch(r'(?:\d{2})?\d{1,2}[-/]\d{1,2}[-/]\d{2}(?:\d{2})?', first[i]):
             result.append({'column': i, 'type': 'Date'}) 
             
         elif i in boolean_columns:
             result.append({'column': i, 'type': 'Boolean'})
 
-        elif re.fullmatch(r'(?!(?:-?\d+)$)(?!(?:-?\d+\.\d+)$)(?!(?:(true|false|t|f)$)).+', first[i], flags=re.IGNORECASE):
+        elif fullmatch(r'(?!(?:-?\d+)$)(?!(?:-?\d+\.\d+)$)(?!(?:(true|false|t|f)$)).+', first[i], flags=IGNORECASE):
             result.append({'column': i, 'type': 'Character'})
 
         else:
@@ -76,10 +86,17 @@ def get_type(lst: list[dict]) -> list[dict]:
     return result
 
 def detect_index(lst: list[dict]) -> bool:
-    '''
-    Remove input from this function and put it in main. 
-    '''
     
+    '''
+    This function detects whether an index column is present. 
+    
+    params: 
+        lst - list of dictionaries of the original CSV dataset. 
+
+    output:
+        True if dataset present, False if not
+    '''
+
     is_first_key_empty = all(len(dct) > 0 and list(dct.keys())[0] == '' for dct in lst)
 
     
@@ -99,8 +116,19 @@ def detect_index(lst: list[dict]) -> bool:
     elif '' not in dataset.columns and not is_first_key_empty:
 
         return False
-
+        
 def del_index(lst: list[dict]) -> None:
+
+    '''
+    This function deletes the dataset from both the Dataset class instance and the list of dictionaries 
+    of the original csv dataset. 
+
+    input:
+        lst - list of dictionaries of the original dataset.
+    
+    output:
+        None.
+    '''
 
     index = dataset.columns.index('')
     dataset.columns.pop(index)

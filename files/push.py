@@ -1,6 +1,16 @@
 import sqlalchemy as sa
 
-def sql_push(column_lst, lst):
+def sql_push(ddl, lst) -> None:
+
+    '''
+    This function gets user information on database, converts the types to SQLalchemy datatype objects,
+    and pushes to database. 
+
+    params:
+        ddl - a list of ddl statements with column name and specified datatype
+        lst - the original list of dictionaries of the csv dataset 
+    '''
+    
     host = input('Host: ')
     dbname = input('DB name: ')
     user = input('User: ')
@@ -12,11 +22,11 @@ def sql_push(column_lst, lst):
 
     engine = sa.create_engine(db_url)
     connection = engine.connect()
-
     metadata = sa.MetaData()
 
+    # Change string into SQLalchemy datatype objects
     columns = []
-    for col in column_lst:
+    for col in ddl:
         col_name, col_type = col.split(' ', 1)
         
         if col_type.startswith('CHAR'):
@@ -43,11 +53,11 @@ def sql_push(column_lst, lst):
         elif col_type == 'REAL':
             col_type_obj = sa.REAL
         elif col_type == 'DOUBLE PRECISION':
-            col_type_obj = sa.Float  # SQLAlchemy uses Float for double precision
+            col_type_obj = sa.Float  
         elif col_type.startswith('NUMERIC'):
                 col_type_obj = sa.Numeric
         else:
-            col_type_obj = sa.String  # Default type if not recognized
+            col_type_obj = sa.String  
 
         columns.append(sa.Column(col_name, col_type_obj))
           

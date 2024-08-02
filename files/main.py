@@ -5,19 +5,24 @@ from get_sub_type import dataset
 from re import fullmatch
 from push import sql_push
 
-def main():
+def main() -> None:
 
+    '''
+    This application takes in a CSV dataset, determines which datatypes to use, generates a SQL DDL statement,
+    and pushes to a user-specified database. 
+    '''
+    
     # Open file and assign to lst as list[dicts]
     file = input('What is the file path? ')
     with open(file, 'r') as infile:
         reader = csv.DictReader(infile, lineterminator='')  
-        lst = list(reader)
+        lst: list[dict] = list(reader)
 
     
     # Get type classifications NUMERIC, CHARACTER, DATE, or BOOLEAN
     response: list[dict] = get_type(lst)
     
-    # Get list of columns with decimal values that require exact precision 
+    # Prompt user to input list of columns that require precision
     precision_lst = set()
 
     for k in dataset.dicts:
@@ -28,8 +33,6 @@ def main():
     if precision_lst:
         print(precision_lst)
         precision_decision: list = input(f'Which fields require precision? ').split(' ')
-    else:
-        precision_decision = None
 
     # Detect index in dataset and prompt user to delete it if present, and add one if not
     index_status: bool = detect_index(lst)
@@ -46,8 +49,10 @@ def main():
         answer = input('No index detected. Would you like to add one? (yes/y to confirm) ')
         want_index = True if answer.lower() in ['yes', 'y'] else False
 
-
+    # Generate DDL statements
     column_lst = generate_ddl(response, want_index, precision_decision)
+
+    # Push to SQL database
     sql_push(column_lst, lst)
     
 if __name__ == '__main__':

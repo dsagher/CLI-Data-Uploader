@@ -3,20 +3,35 @@ from re import fullmatch
 from typing import Optional
 
 
-def get_boolean(key: str, values: set) -> str:
+def get_boolean(key: str) -> str:
+    '''
+    params:
+        key - one column name
+
+    output:
+        str: 'column BOOLEAN'  
+    '''
     
     result = f'{key} BOOLEAN'
 
     return result
     
 def get_numeric(key: str, value: set, precision_decision: list) -> str:
+    '''
+    params: 
+        key - one column name
+        value - a set of unique values for that column
+        precision_decision - a list of columns that the user specified require precision
+    
+    output:
+        str: 'column_name DATATYPE'
 
+    '''
     dct = dict()
     
-    # Change value from set to list to iterate
+    
     dct[key] = list(value)
     
-    # Generator expressions
     cnt = max(len(i) for i in dct[key])
     mx = max(i for i in dct[key])
     mn = min(i for i in dct[key])
@@ -39,6 +54,15 @@ def get_numeric(key: str, value: set, precision_decision: list) -> str:
     return result
 
 def get_index() -> Optional[str]:
+    '''
+    This function runs if user specifies wants index.
+
+    params:
+        None
+    ouput:
+        str: 'index SERIALTYPE'   
+    '''
+
 
     result =    f'index SMALLSERIAL' if dataset.length <= 32767 else \
                 f'index SERIAL' if dataset.length <= 2147483647 else \
@@ -47,6 +71,16 @@ def get_index() -> Optional[str]:
     return result
         
 def get_char(key: str, values: set) -> str:
+
+    '''
+    params: 
+        key - one column name
+        value - a set of unique values for that column
+    
+    output:
+        str: 'columname DATATYPE'
+
+    '''
 
     mx = max(len(i) for i in values)
 
@@ -63,6 +97,17 @@ def get_char(key: str, values: set) -> str:
 
 def get_date(key: str, values: set) -> str:
     
+    '''
+    params: 
+        key - one column name
+        value - a set of unique values for that column
+
+    output:
+        str: 'columnname DATATYPE'
+
+    error:
+        raises ValueError if date formats are incorrect or are inconsistent
+    '''
     try: 
         date_lst = list()
         time_lst = list()
@@ -122,7 +167,6 @@ def get_date(key: str, values: set) -> str:
             result = f'{key} Unknown Format'                   
 
     except ValueError as e:
-        result = str(e)
+        print(f' Error Occured Processessing a Date Column : {str(e)}')
 
     return result
-   

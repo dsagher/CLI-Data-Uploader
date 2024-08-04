@@ -1,6 +1,7 @@
 from convert import dataset
 from re import fullmatch
 from typing import Optional
+from sys import exit
 
 def get_boolean(key: str) -> str:
     '''
@@ -41,14 +42,14 @@ def get_numeric(key: str, value: set, precision_decision: list) -> str:
         result = f'{key} NUMERIC' if key in precision_decision else \
                  f'{key} REAL' if cnt <= 6 else \
                  f'{key} DOUBLE PRECISION' if cnt <= 15 else \
-                 f'{key} Unknown for: {key}'  # Default to DOUBLE PRECISION if conditions are met
+                 f'{key} NUMERIC' 
 
     else:
         int_mn, int_mx = int(mn), int(mx)
         result = f'{key} SMALLINT' if -32768 <= int_mn and int_mx <= 32767 else \
                  f'{key} INT' if -2147483648 <= int_mn and int_mx <= 2147483647 else \
                  f'{key} BIGINT' if -9223372036854775808 <= int_mn and int_mx <= 9223372036854775807 else \
-                 f'Unknown for: {key}'
+                 f'{key} NUMERIC'
         
     return result
 
@@ -123,12 +124,12 @@ def get_date(key: str, values: set) -> str:
         time_pattern = r'\d{2}:\d{2}:\d{2}'
 
         # Iterate through values list and pass values into respective lists, including a bucket for formats that don't fit.
-        for v in list(values):
+        for v in values:
             
             if fullmatch(date_pattern_1, v) or fullmatch(date_pattern_2, v):
                 date_lst.append(v)
 
-            elif fullmatch(date_pattern_1 + r'\s' + time_pattern, v):
+            elif fullmatch(date_pattern_1 + r'\s' + time_pattern, v) or fullmatch(date_pattern_2 + r'\s' + time_pattern, v):
                 timestamp_lst.append(v)
 
             elif fullmatch(time_pattern, v):
@@ -140,19 +141,17 @@ def get_date(key: str, values: set) -> str:
         # Set result to appropriate DDL statement
         if unformatted_lst: # Recognize incorrect formats
             if date_lst:
-                raise ValueError(f'{key} DATE Incorrect format: {unformatted_lst}')
+                raise ValueError(f'{key} DATE Incorrect Format: {unformatted_lst[0]}')
             elif timestamp_lst:
-                raise ValueError(f'{key} TIMESTAMP Incorrect format: {unformatted_lst}')
+                raise ValueError(f'{key} TIMESTAMP Incorrect Format: {unformatted_lst[0]}')
             elif time_lst:
-                raise ValueError(f'{key} TIME Incorrect format: {unformatted_lst}')
+                raise ValueError(f'{key} TIME Incorrect Format: {unformatted_lst[0]}')
             else:
-                raise ValueError(f'{key} Unknown Format {unformatted_lst}')
+                raise ValueError(f'{key} Unknown Format: {unformatted_lst[0]}')
         
         elif (date_lst and (time_lst or timestamp_lst)) or (timestamp_lst and time_lst):
             # Recognize correct but inconsistent formats
-            raise ValueError(f'{key} Inconsistent format: {date_lst[0] if date_lst else ""} \
-                                                          {time_lst[0] if time_lst else ""} \
-                                                          {timestamp_lst[0] if timestamp_lst else ""}')
+            raise ValueError(f'{key} Inconsistent Format: Date: {date_lst[0] if date_lst else "NA"} Time: {time_lst[0] if time_lst else "NA"} Timestamp: {timestamp_lst[0] if timestamp_lst else "NA"}')
         
         
         # If lsts exists and all the values made it through the conditional 
@@ -164,8 +163,7 @@ def get_date(key: str, values: set) -> str:
             result = f'{key} TIME'
         else:
             result = f'{key} Unknown Format'                   
+        return result
 
     except ValueError as e:
-        print(f' Error Occured Processessing a Date Column : {str(e)}')
-
-    return result
+        raise ValueError(e)

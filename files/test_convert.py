@@ -97,3 +97,6 @@ def test_extract_values():
 
     lst_of_dicts = [{'hello':'1'},{'hello':'0'},{'hey':'1'},{'hey':'1'}, {'who':'3'}]
     assert extract_values(lst_of_dicts) == {'hello','hey'}
+
+def detect_index():
+    pass

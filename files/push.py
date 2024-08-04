@@ -1,5 +1,5 @@
 import sqlalchemy as sa
-
+import re
 def sql_push(ddl, lst) -> None:
 
     '''
@@ -27,10 +27,22 @@ def sql_push(ddl, lst) -> None:
     # Change string into SQLalchemy datatype objects
     columns = []
     for col in ddl:
-        col_name, col_type = col.split(' ', 1)
         
+        # col_name, col_type = col.split(' ', 1)
+        type_pattern = (
+        r'VARCHAR|CHAR\(\d+\)|TEXT|NUMERIC|'
+        r'INT|SMALLINT|BIGINT|REAL|DOUBLE PRECISION|SMALLSERIAL|'
+        r'SERIAL|BIGSERIAL|DATE|DATETIME|TIME'
+    )
+    match_pattern = rf'(.+) ({type_pattern})'
+
+    for col in ddl:
+        match = re.fullmatch(match_pattern, col)
+        if match:
+            col_name, col_type = match.groups()
+            print(col_name, col_type)
         if col_type.startswith('CHAR'):
-            char_length = int(col_type.split('(')[1].strip(')'))
+            char_length = int(re.search(r'\d+', col_type).group())
             col_type_obj = sa.CHAR(char_length)
         elif col_type.startswith('VARCHAR'):
             col_type_obj = sa.String
@@ -58,9 +70,9 @@ def sql_push(ddl, lst) -> None:
                 col_type_obj = sa.Numeric
         else:
             col_type_obj = sa.String  
-
+        
         columns.append(sa.Column(col_name, col_type_obj))
-          
+    
     table = sa.Table(table_name,metadata,*columns)
 
     metadata.create_all(engine)

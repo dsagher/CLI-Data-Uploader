@@ -1,7 +1,7 @@
 from convert import dataset
 from re import fullmatch
 from typing import Optional
-from sys import exit
+
 
 def get_boolean(key: str) -> str:
     '''
@@ -16,7 +16,7 @@ def get_boolean(key: str) -> str:
 
     return result
     
-def get_numeric(key: str, value: set, precision_decision: list) -> str:
+def get_numeric(key: str, values: set, precision_decision: list) -> str:
     '''
     params: 
         key - one column name
@@ -27,19 +27,34 @@ def get_numeric(key: str, value: set, precision_decision: list) -> str:
         str: 'column_name DATATYPE'
 
     '''
-    dct = dict()
-    
-    
-    dct[key] = list(value)
+
+    values_list = list(values)
+    dct = {key: list(values)}
     
     cnt = max(len(i) for i in dct[key])
     mx = max(i for i in dct[key])
     mn = min(i for i in dct[key])
     dec = any('.' in i for i in dct[key])
+
+    length_lst = set()
+    prec_scale = set()
     
-     
+    # Find largest Precision and Scale for each column
+    for value in values_list:
+        if '.' in value:
+            length_lst.add(len(value))
+            left, right = value.split('.')
+            precision = len(left) + len(right)
+            scale = len(right)
+            prec_scale.add((precision, scale))
+
+    # Determine the maximum precision and scale
+    if prec_scale:
+        max_precision, max_scale = max(prec_scale, key=lambda x: (x[0], x[1]))
+
     if dec:
-        result = f'{key} NUMERIC' if key in precision_decision else \
+        result = f'{key} NUMERIC({max_precision},{max_scale})' if key in precision_decision \
+                 and max_precision is not None and max_scale is not None else \
                  f'{key} REAL' if cnt <= 6 else \
                  f'{key} DOUBLE PRECISION' if cnt <= 15 else \
                  f'{key} NUMERIC' 
@@ -62,7 +77,6 @@ def get_index() -> Optional[str]:
     ouput:
         str: 'index SERIALTYPE'   
     '''
-
 
     result =    f'index SMALLSERIAL' if dataset.length <= 32767 else \
                 f'index SERIAL' if dataset.length <= 2147483647 else \
@@ -108,6 +122,7 @@ def get_date(key: str, values: set) -> str:
     error:
         raises ValueError if date formats are incorrect or are inconsistent
     '''
+
     try: 
         date_lst = list()
         time_lst = list()

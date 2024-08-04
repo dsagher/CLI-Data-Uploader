@@ -24,16 +24,17 @@ def main() -> None:
     
     # Prompt user to input list of columns that require precision
     precision_lst = set()
-    print(precision_lst)
+    
     for k in dataset.dicts:
         for v in dataset.dicts[k]:
             if fullmatch(r'-?\d+\.\d+', v):
                 precision_lst.add(f'{k}')
 
+    precision_decision = None
     if precision_lst:
         print(precision_lst)
-        precision_decision: list = input(f'Which fields require precision? ').lower().split(',')
-
+        precision_decision: list = input(f'Which fields require precision? ').split(', ')
+        
     # Detect index in dataset and prompt user to delete it if present, and add one if not
     index_status: bool = detect_index(lst)
 

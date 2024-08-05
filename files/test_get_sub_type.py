@@ -2,7 +2,7 @@ from get_sub_type import (get_char,
                           get_date, 
                           get_numeric)
 from pytest import raises
-from main import main
+
 
 def test_get_date():
     assert get_date('column_name', {'02-19-1995'}) == 'column_name DATE'

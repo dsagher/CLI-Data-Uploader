@@ -54,8 +54,8 @@ def sql_push(ddl, lst) -> None:
     
     # Change string into SQLalchemy datatype objects
     columns = []
-    print('ddl:', len(ddl))
-    print(ddl)    
+    # print('ddl:', len(ddl))
+    # print(ddl)    
         # col_name, col_type = col.split(' ', 1)
     type_pattern = (
         r'VARCHAR|CHAR\(\d+\)|TEXT|NUMERIC(?:\(\d+,\d+\))?'

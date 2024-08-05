@@ -27,14 +27,16 @@ def get_numeric(key: str, values: set, precision_decision: list) -> str:
         str: 'column_name DATATYPE'
 
     '''
-
+    # Get rid of nulls for classification
     values = {value for value in values if value != ''}
 
-    # Find largest Precision and Scale for each column
-    values_list = list(values)
-    length_lst = set()
 
-    for value in values_list:
+    # Find largest Precision and Scale for each column
+
+    length_lst = set()
+    prec_scale = set()
+
+    for value in values:
         if '.' in value:
             length_lst.add(len(value))
             left, right = value.split('.')
@@ -42,18 +44,17 @@ def get_numeric(key: str, values: set, precision_decision: list) -> str:
             scale = len(right)
             prec_scale.add((precision, scale))
 
-    # Determine the maximum precision and scale
-    prec_scale = set()
 
     if prec_scale:
         max_precision, max_scale = max(prec_scale, key=lambda x: (x[0], x[1]))
 
-    cnt = max(len(i) for i in values if i != '')
-    mx = max(int(i) for i in values if i != '')
-    mn = min(int(i) for i in values if i != '')
+    # Determine specific datatypes - with and without decimals
     dec = any('.' in i for i in values)
 
     if dec:
+
+        cnt = max(len(i) for i in values if i != '')
+
         result = f'{key} NUMERIC({max_precision},{max_scale})' if key in precision_decision \
                  and max_precision is not None and max_scale is not None else \
                  f'{key} REAL' if cnt <= 6 else \
@@ -61,10 +62,13 @@ def get_numeric(key: str, values: set, precision_decision: list) -> str:
                  f'{key} NUMERIC' 
 
     else:
-        int_mn, int_mx = int(mn), int(mx)
-        result = f'{key} SMALLINT' if -32768 <= int_mn and int_mx <= 32767 else \
-                 f'{key} INT' if -2147483648 <= int_mn and int_mx <= 2147483647 else \
-                 f'{key} BIGINT' if -9223372036854775808 <= int_mn and int_mx <= 9223372036854775807 else \
+
+        mx = max(int(i) for i in values if i != '')
+        mn = min(int(i) for i in values if i != '')
+
+        result = f'{key} SMALLINT' if -32768 <= mn and mx <= 32767 else \
+                 f'{key} INT' if -2147483648 <= mn and mx <= 2147483647 else \
+                 f'{key} BIGINT' if -9223372036854775808 <= mn and mx <= 9223372036854775807 else \
                  f'{key} NUMERIC'
      
     return result
@@ -154,8 +158,8 @@ def get_date(key: str, values: set) -> str:
             else:
                 unformatted_lst.append(v)
 
-        # Set result to appropriate DDL statement
-        if unformatted_lst: # Recognize incorrect formats
+        # Raise ValueError for incorrect or inconsistent DATE/TIMESTAMP/TIME
+        if unformatted_lst: 
             if date_lst:
                 raise ValueError(f'{key} DATE Incorrect Format: {unformatted_lst[0]}')
             elif timestamp_lst:

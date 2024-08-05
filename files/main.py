@@ -4,6 +4,8 @@ from generate_ddl import generate_ddl
 from get_sub_type import dataset
 from re import fullmatch
 from push import sql_push
+from pprint import pprint
+
 
 def main() -> None:
 
@@ -17,7 +19,7 @@ def main() -> None:
     with open(file, 'r') as infile:
         reader = DictReader(infile, lineterminator='')  
         lst: list[dict] = list(reader)
-
+    
     
     # Get type classifications NUMERIC, CHARACTER, DATE, or BOOLEAN
     response: list[dict] = get_type(lst)
@@ -32,7 +34,7 @@ def main() -> None:
 
     precision_decision = None
     if precision_lst:
-        print(precision_lst)
+        pprint(precision_lst)
         precision_decision: list = input(f'Which fields require precision? ').split(', ')
         
     # Detect index in dataset and prompt user to delete it if present, and add one if not

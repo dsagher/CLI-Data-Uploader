@@ -1,15 +1,33 @@
 import sqlalchemy as sa
-import re
+from re import fullmatch, compile, search
+
 
 def to_bool(statement, lst) -> None:
 
-    for s in lst:
-        if s[statement] == 'True':
-            s[statement] = True
+    for dct in lst:
+        if dct[statement] in ['True', 't', '1','true','TRUE']:
+            dct[statement] = True
         else:
-            s[statement] = False
-
+            dct[statement] = False
     
+
+def to_null(lst: list[dict]) -> list[dict]:
+
+    processed_lst = []
+    for row in lst:
+
+        processed_row = {}
+        for key, val in row.items():
+            if val == '':
+                processed_row[key] = None
+            else:
+                processed_row[key] = val
+
+        processed_lst.append(processed_row)
+    
+    return processed_lst
+
+
 def sql_push(ddl, lst) -> None:
 
     '''
@@ -36,8 +54,8 @@ def sql_push(ddl, lst) -> None:
     
     # Change string into SQLalchemy datatype objects
     columns = []
-    # print('ddl:', len(ddl))
-    # print(ddl)    
+    print('ddl:', len(ddl))
+    print(ddl)    
         # col_name, col_type = col.split(' ', 1)
     type_pattern = (
         r'VARCHAR|CHAR\(\d+\)|TEXT|NUMERIC(?:\(\d+,\d+\))?'
@@ -45,18 +63,18 @@ def sql_push(ddl, lst) -> None:
         r'SERIAL|BIGSERIAL|DATE|TIMESTAMP|TIME|BOOLEAN'
     )
     match_pattern = rf'(.+?)\s+({type_pattern})'
-    numeric_pattern = re.compile(r'NUMERIC(?:\((\d+),(\d+)\))?')
-
-    counter = 0
+    numeric_pattern = compile(r'NUMERIC(?:\((\d+),(\d+)\))?')
+    
     for col in ddl:
-        match = re.fullmatch(match_pattern, col)
+        match = fullmatch(match_pattern, col)
+
         if match:
             col_name, col_type = match.groups()
             # print(f'name: {col_name}, type: {col_type}')
-            counter += 1
+            
 
             if col_type.startswith('CHAR'):
-                char_length = int(re.search(r'\d+', col_type).group())
+                char_length = int(search(r'\d+', col_type).group())
                 col_type_obj = sa.CHAR(char_length)
 
             elif col_type == 'VARCHAR':
@@ -117,17 +135,20 @@ def sql_push(ddl, lst) -> None:
 
         # print('counter', counter)
         columns.append(sa.Column(col_name, col_type_obj))
-    # print('columns', len(columns))
+    
   
     # for column in columns:
-    #     print(column)
+    # print(columns)
     table = sa.Table(table_name,metadata,*columns)
 
     metadata.create_all(engine)
 
     try:
         with engine.begin() as conn:
-            conn.execute(table.insert(), lst)
+
+            processed_lst = to_null(lst)
+
+            conn.execute(table.insert(), processed_lst)
         print(f"Data inserted successfully into {table_name}.")
     except Exception as e:
         print(f'An error occurred: {e}')

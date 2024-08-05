@@ -42,7 +42,7 @@ def test_numeric():
     lst_of_dicts = [{'hello':'1.23'}]
     assert get_type(lst_of_dicts) == [{'column': 'hello', 'type': 'Numeric'}]
 
-    lst_of_dicts = [{'hello':'.23'}]
+    lst_of_dicts = [{'hello':'0.23'}]
     assert get_type(lst_of_dicts) == [{'column': 'hello', 'type': 'Numeric'}]
 
     lst_of_dicts = [{'hello':'1112341.235432123'}]
@@ -53,7 +53,9 @@ def test_numeric():
 
     lst_of_dicts = [{'hello':'1'}, {'hello':'0'}]
     assert get_type(lst_of_dicts) != [{'column': 'hello', 'type': 'Numeric'}]
-    
+
+    lst_of_dicts = [{'hello':'-178.975434'}, {'hello':'-123.456789'}]
+    assert get_type(lst_of_dicts) == [{'column': 'hello', 'type': 'Numeric'}]
 
 def test_date():
 

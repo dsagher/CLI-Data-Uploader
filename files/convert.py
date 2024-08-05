@@ -30,7 +30,6 @@ def extract_values(lst: list[dict]) -> set[str]:
         values = {v.lower() for key, v in collect if key == k}
         if values.issubset({'0', '1', 'true', 'false', 't', 'f'}):
             boolean_columns.add(k)
-
     
     unique_values: dict = {k: set() for k in keys}
 
@@ -60,28 +59,34 @@ def get_type(lst: list[dict]) -> list[dict]:
         result -  a list of dictionaries containing {'column: column_name, 'type': 'datatype'}
     '''
     
-    first = lst[0]
     result = list()
 
     boolean_columns = extract_values(lst)
-    
-    for i in first:   
+    processed_dct = dict()
+    for dct in lst:
         
+        for key, value in dct.items():
+            if value != '':
+                processed_dct[key] = value
 
-        if fullmatch(r'-?\d+(\.\d+)?([eE][-+]?\d+)?',first[i]) and i not in boolean_columns:
-            result.append({'column': i, 'type': 'Numeric'})    
+    for key in processed_dct:
 
-        elif fullmatch(r'(?:\d{2})?\d{1,2}[-/]\d{1,2}[-/]\d{2}(?:\d{2})?', first[i]):
-            result.append({'column': i, 'type': 'Date'}) 
+        if fullmatch(r'-?\d+(\.\d+)?([eE][-+]?\d+)?', processed_dct[key]) and key not in boolean_columns:
+            print('numeric', key)
+            result.append({'column': key, 'type': 'Numeric'})    
+
+        elif fullmatch(r'(?:\d{2})?\d{1,2}[-/:]\d{1,2}[-/:]\d{2}(?:\d{2})?', processed_dct[key]):
+            result.append({'column': key, 'type': 'Date'}) 
             
-        elif i in boolean_columns:
-            result.append({'column': i, 'type': 'Boolean'})
+        elif key in boolean_columns:
+            result.append({'column': key, 'type': 'Boolean'})
 
-        elif fullmatch(r'(?!(?:-?\d+)$)(?!(?:-?\d+\.\d+)$)(?!(?:(true|false|t|f)$)).+', first[i], flags=IGNORECASE):
-            result.append({'column': i, 'type': 'Character'})
-
+        elif fullmatch(r'^(?!-?\d+(\.\d+)?([eE][-+]?\d+)?$).+', processed_dct[key], flags=IGNORECASE) and key not in boolean_columns:
+            result.append({'column': key, 'type': 'Character'})
+            print('character', key)
         else:
-            result.append({'column': i, 'type': 'Unknown'})        
+            result.append({'column': key, 'type': 'Unknown'})   
+            print('unknown', key)     
              
     return result
 
@@ -99,7 +104,6 @@ def detect_index(lst: list[dict]) -> bool:
 
     is_first_key_empty = all(len(dct) > 0 and list(dct.keys())[0] == '' for dct in lst)
 
-    
     if is_first_key_empty:
 
         values = [dct.get('') for dct in lst]

@@ -6,7 +6,6 @@ from re import fullmatch
 from push import sql_push
 from pprint import pprint
 
-
 def main() -> None:
 
     '''
@@ -32,11 +31,10 @@ def main() -> None:
             if fullmatch(r'-?\d+\.\d+', v):
                 precision_lst.add(f'{k}')
 
-    precision_decision = None
     if precision_lst:
         pprint(precision_lst)
         precision_decision: list = input(f'Which fields require precision? ').split(', ')
-        
+
     # Detect index in dataset and prompt user to delete it if present, and add one if not
     index_status: bool = detect_index(lst)
 

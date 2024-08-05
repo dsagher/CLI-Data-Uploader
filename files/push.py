@@ -2,23 +2,25 @@ import sqlalchemy as sa
 from re import fullmatch, compile, search
 
 
-def to_bool(statement, lst) -> None:
+def to_bool(key: str, lst: list[dict]) -> None:
 
+    # Change bool strings into bool types
     for dct in lst:
-        if dct[statement] in ['True', 't', '1','true','TRUE']:
-            dct[statement] = True
+        if dct[key] in ['True', 't', '1','true','TRUE']:
+            dct[key] = True
         else:
-            dct[statement] = False
+            dct[key] = False
     
-
 def to_null(lst: list[dict]) -> list[dict]:
 
+    # Change null strings into null types
     processed_lst = []
-    for row in lst:
 
-        processed_row = {}
-        for key, val in row.items():
-            if val == '':
+    for dct in lst:
+
+        processed_row = dict()
+        for key, val in dct.items():
+            if val.lower() in ['','na','null', '-']:
                 processed_row[key] = None
             else:
                 processed_row[key] = val
@@ -27,36 +29,17 @@ def to_null(lst: list[dict]) -> list[dict]:
     
     return processed_lst
 
-
-def sql_push(ddl, lst) -> None:
-
+def alchemy_type(ddl: list, lst: list[dict]) -> list:
     '''
-    This function gets user information on database, converts the types to SQLalchemy datatype objects,
-    and pushes to database. 
+    This function converts generated SQL DDL statements into SQLalchemy datatypes
 
     params:
-        ddl - a list of ddl statements with column name and specified datatype
-        lst - the original list of dictionaries of the csv dataset 
+
+    ddl - list of DDL statements
+    lst - list of dictionaries of original data
     '''
-    
-    host = input('Host: ')
-    dbname = input('DB name: ')
-    user = input('User: ')
-    password = input('Password: ')
-    port = input('Port: ')
-    table_name = input('Table Name: ')
+    columns = list()
 
-    db_url = f'postgresql://{user}:{password}@{host}:{port}/{dbname}'
-
-    engine = sa.create_engine(db_url)
-    connection = engine.connect()
-    metadata = sa.MetaData()
-    
-    # Change string into SQLalchemy datatype objects
-    columns = []
-    # print('ddl:', len(ddl))
-    # print(ddl)    
-        # col_name, col_type = col.split(' ', 1)
     type_pattern = (
         r'VARCHAR|CHAR\(\d+\)|TEXT|NUMERIC(?:\(\d+,\d+\))?'
         r'|INT|SMALLINT|BIGINT|REAL|DOUBLE PRECISION|SMALLSERIAL|'
@@ -70,8 +53,6 @@ def sql_push(ddl, lst) -> None:
 
         if match:
             col_name, col_type = match.groups()
-            # print(f'name: {col_name}, type: {col_type}')
-            
 
             if col_type.startswith('CHAR'):
                 char_length = int(search(r'\d+', col_type).group())
@@ -131,14 +112,45 @@ def sql_push(ddl, lst) -> None:
                 col_type_obj = sa.BigInteger().with_variant(sa.BigInteger, 'postgresql')
 
             else:
-                col_type_obj = sa.String 
+                col_type_obj = sa.String
+                raise Exception(f'{col} Defaulted to String')
 
-        # print('counter', counter)
-        columns.append(sa.Column(col_name, col_type_obj))
-    
-  
-    # for column in columns:
-    # print(columns)
+            columns.append(sa.Column(col_name, col_type_obj))
+
+    return columns
+
+def sql_push(ddl: list, lst: list[dict]) -> None:
+
+    '''
+    This function gets user information on database, converts the types to SQLalchemy datatype objects,
+    and pushes to database. 
+
+    params:
+        ddl - a list of ddl statements with column name and specified datatype
+        lst - the original list of dictionaries of the csv dataset 
+    '''
+    # Get user database info
+    host = input('Host: ')
+    dbname = input('DB name: ')
+    user = input('User: ')
+    password = input('Password: ')
+    port = input('Port: ')
+    table_name = input('Table Name: ')
+
+    db_url = f'postgresql://{user}:{password}@{host}:{port}/{dbname}'
+
+    # Create connection  
+    engine = sa.create_engine(db_url)
+    connection = engine.connect()
+    metadata = sa.MetaData()
+
+    # Convert to SQLalchemy datatypes
+    columns = alchemy_type(ddl, lst)
+
+    # Processes '' to None's
+    processed_lst = to_null(lst)
+
+    # Create table
     table = sa.Table(table_name,metadata,*columns)
 
     metadata.create_all(engine)
@@ -146,10 +158,9 @@ def sql_push(ddl, lst) -> None:
     try:
         with engine.begin() as conn:
 
-            processed_lst = to_null(lst)
-
             conn.execute(table.insert(), processed_lst)
         print(f"Data inserted successfully into {table_name}.")
+
     except Exception as e:
         print(f'An error occurred: {e}')
         conn.rollback()

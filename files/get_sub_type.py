@@ -28,7 +28,7 @@ def get_numeric(key: str, values: set, precision_decision: list) -> str:
 
     '''
     # Get rid of nulls for classification
-    values = {value for value in values if value != ''}
+    values = {value for value in values if value.lower() not in ['', 'na', 'null']}
 
 
     # Find largest Precision and Scale for each column
@@ -44,33 +44,35 @@ def get_numeric(key: str, values: set, precision_decision: list) -> str:
             scale = len(right)
             prec_scale.add((precision, scale))
 
-
     if prec_scale:
         max_precision, max_scale = max(prec_scale, key=lambda x: (x[0], x[1]))
 
     # Determine specific datatypes - with and without decimals
     dec = any('.' in i for i in values)
 
-    if dec:
+    try:
+        if dec:
 
-        cnt = max(len(i) for i in values if i != '')
+            cnt = max(len(i) for i in values if i != '')
 
-        result = f'{key} NUMERIC({max_precision},{max_scale})' if key in precision_decision \
-                 and max_precision is not None and max_scale is not None else \
-                 f'{key} REAL' if cnt <= 6 else \
-                 f'{key} DOUBLE PRECISION' if cnt <= 15 else \
-                 f'{key} NUMERIC' 
+            result = f'{key} NUMERIC({max_precision},{max_scale})' if key in precision_decision \
+                    and max_precision is not None and max_scale is not None else \
+                    f'{key} REAL' if cnt <= 6 else \
+                    f'{key} DOUBLE PRECISION' if cnt <= 15 else \
+                    f'{key} NUMERIC' 
 
-    else:
+        else:
 
-        mx = max(int(i) for i in values if i != '')
-        mn = min(int(i) for i in values if i != '')
+            mx = max(int(i) for i in values if i != '')
+            mn = min(int(i) for i in values if i != '')
 
-        result = f'{key} SMALLINT' if -32768 <= mn and mx <= 32767 else \
-                 f'{key} INT' if -2147483648 <= mn and mx <= 2147483647 else \
-                 f'{key} BIGINT' if -9223372036854775808 <= mn and mx <= 9223372036854775807 else \
-                 f'{key} NUMERIC'
-     
+            result = f'{key} SMALLINT' if -32768 <= mn and mx <= 32767 else \
+                    f'{key} INT' if -2147483648 <= mn and mx <= 2147483647 else \
+                    f'{key} BIGINT' if -9223372036854775808 <= mn and mx <= 9223372036854775807 else \
+                    f'{key} NUMERIC'
+    except Exception as e:
+        print(f'An error occured in processessing Numeric values:{e}')
+
     return result
 
 def get_index() -> Optional[str]:
@@ -105,13 +107,16 @@ def get_char(key: str, values: set) -> str:
 
     lengths = list(map(lambda x: len(x), values))
     same = all(v == lengths[0] for v in lengths)
-    
-    if same:
-        result = f'{key} CHAR({lengths[0]})'
-    else:
-        result = f'{key} VARCHAR' if mx < 65535 else \
-                 f'{key} TEXT'
 
+    try:
+        if same:
+            result = f'{key} CHAR({lengths[0]})'
+        else:
+            result = f'{key} VARCHAR' if mx < 65535 else \
+                    f'{key} TEXT'
+    except Exception as e:
+        print(f'An error occured in processessing Character values:{e}')
+        
     return result
 
 def get_date(key: str, values: set) -> str:
@@ -155,7 +160,7 @@ def get_date(key: str, values: set) -> str:
             elif fullmatch(time_pattern, v):
                 time_lst.append(v)
 
-            else:
+            elif v.lower() not in ['na', 'null']:
                 unformatted_lst.append(v)
 
         # Raise ValueError for incorrect or inconsistent DATE/TIMESTAMP/TIME
@@ -175,11 +180,11 @@ def get_date(key: str, values: set) -> str:
         
         
         # If lsts exists and all the values made it through the conditional 
-        elif date_lst and len(date_lst) == len(values): 
+        elif date_lst: 
             result = f'{key} DATE'
-        elif timestamp_lst and len(timestamp_lst) == len(values):
+        elif timestamp_lst:
             result = f'{key} TIMESTAMP'
-        elif time_lst and len(time_lst) == len(values):
+        elif time_lst:
             result = f'{key} TIME'
         else:
             result = f'{key} Unknown Format'                   

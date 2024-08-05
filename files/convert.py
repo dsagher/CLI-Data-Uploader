@@ -123,6 +123,7 @@ def detect_index(lst: list[dict]) -> bool:
         
 def del_index(lst: list[dict]) -> None:
 
+
     '''
     This function deletes the dataset from both the Dataset class instance and the list of dictionaries 
     of the original csv dataset. 
@@ -141,3 +142,4 @@ def del_index(lst: list[dict]) -> None:
     for dct in lst:
         if '' in dct:
             del dct['']
+

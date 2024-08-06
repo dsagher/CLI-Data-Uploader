@@ -72,7 +72,7 @@ def get_type(lst: list[dict]) -> list[dict]:
     for key in processed_dct:
 
         if fullmatch(r'-?\d+(\.\d+)?([eE][-+]?\d+)?', processed_dct[key]) and key not in boolean_columns:
-            # print('numeric', key)
+            
             result.append({'column': key, 'type': 'Numeric'})    
 
         elif fullmatch(r'(?:\d{2})?\d{1,2}[-/:]\d{1,2}[-/:]\d{2}(?:\d{2})?', processed_dct[key]):
@@ -83,10 +83,10 @@ def get_type(lst: list[dict]) -> list[dict]:
 
         elif fullmatch(r'^(?!-?\d+(\.\d+)?([eE][-+]?\d+)?$).+', processed_dct[key], flags=IGNORECASE) and key not in boolean_columns:
             result.append({'column': key, 'type': 'Character'})
-            # print('character', key)
+            
         else:
             result.append({'column': key, 'type': 'Unknown'})   
-            # print('unknown', key)     
+               
              
     return result
 
@@ -138,6 +138,7 @@ def del_index(lst: list[dict]) -> None:
     index = dataset.columns.index('')
     dataset.columns.pop(index)
     dataset.dicts.pop('')
+    
     # Remove the empty string column from each dictionary in the list
     for dct in lst:
         if '' in dct:

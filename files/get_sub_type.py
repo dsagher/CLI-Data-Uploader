@@ -43,7 +43,7 @@ def get_numeric(key: str, values: set, precision_decision: list) -> str:
             prec_scale.add((precision, scale))
 
     if prec_scale:
-        max_precision, max_scale = max(prec_scale, key=lambda x: (x[1], x[0]))  # Prioritize scale, then precision
+        max_precision, max_scale = max(prec_scale, key=lambda x: (x[0], x[1]))
 
     # Determine specific datatypes - with and without decimals
     dec = any('.' in i for i in values)

@@ -1,7 +1,6 @@
 import sqlalchemy as sa
 from re import fullmatch, compile, search
 
-
 def to_bool(key: str, lst: list[dict]) -> None:
 
     # Change bool strings into bool types
@@ -113,7 +112,6 @@ def alchemy_type(ddl: list, lst: list[dict]) -> list:
 
             else:
                 col_type_obj = sa.String
-                raise Exception(f'{col} Defaulted to String')
 
             columns.append(sa.Column(col_name, col_type_obj))
 

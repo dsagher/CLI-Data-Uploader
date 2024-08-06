@@ -2,7 +2,6 @@ from convert import dataset
 from re import fullmatch
 from typing import Optional
 
-
 def get_boolean(key: str) -> str:
     '''
     params:
@@ -30,7 +29,6 @@ def get_numeric(key: str, values: set, precision_decision: list) -> str:
     # Get rid of nulls for classification
     values = {value for value in values if value.lower() not in ['', 'na', 'null']}
 
-
     # Find largest Precision and Scale for each column
 
     length_lst = set()
@@ -45,7 +43,7 @@ def get_numeric(key: str, values: set, precision_decision: list) -> str:
             prec_scale.add((precision, scale))
 
     if prec_scale:
-        max_precision, max_scale = max(prec_scale, key=lambda x: (x[0], x[1]))
+        max_precision, max_scale = max(prec_scale, key=lambda x: (x[1], x[0]))  # Prioritize scale, then precision
 
     # Determine specific datatypes - with and without decimals
     dec = any('.' in i for i in values)
@@ -55,7 +53,7 @@ def get_numeric(key: str, values: set, precision_decision: list) -> str:
 
             cnt = max(len(i) for i in values if i != '')
 
-            result = f'{key} NUMERIC({max_precision},{max_scale})' if key in precision_decision \
+            result = f'{key} NUMERIC({max_precision + 1},{max_scale})' if key in precision_decision \
                     and max_precision is not None and max_scale is not None else \
                     f'{key} REAL' if cnt <= 6 else \
                     f'{key} DOUBLE PRECISION' if cnt <= 15 else \
@@ -71,7 +69,7 @@ def get_numeric(key: str, values: set, precision_decision: list) -> str:
                     f'{key} BIGINT' if -9223372036854775808 <= mn and mx <= 9223372036854775807 else \
                     f'{key} NUMERIC'
     except Exception as e:
-        print(f'An error occured in processessing Numeric values:{e}')
+        print(f'An error occurred in processing Numeric values:{e}')
 
     return result
 
@@ -116,7 +114,7 @@ def get_char(key: str, values: set) -> str:
                     f'{key} TEXT'
     except Exception as e:
         print(f'An error occured in processessing Character values:{e}')
-        
+
     return result
 
 def get_date(key: str, values: set) -> str:

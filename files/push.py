@@ -13,7 +13,7 @@ def to_bool(key: str, lst: list[dict]) -> None:
 def to_null(lst: list[dict]) -> list[dict]:
 
     # Change null strings into null types
-    processed_lst = []
+    processed_lst = list()
 
     for dct in lst:
 

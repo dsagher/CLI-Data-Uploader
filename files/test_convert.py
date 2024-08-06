@@ -31,7 +31,6 @@ def test_char():
     lst_of_dicts = [{'hello':'FALSE'}]
     assert get_type(lst_of_dicts) != [{'column': 'hello', 'type': 'Character'}]
 
-
 def test_numeric():
     lst_of_dicts = [{'hello':'123'}, {'goodbye':'456'}]
     assert get_type(lst_of_dicts) == [{'column': 'hello', 'type': 'Numeric'}]
@@ -74,7 +73,6 @@ def test_date():
     lst_of_dicts = [{'hello': '2-19-1995'}]
     assert get_type(lst_of_dicts) == [{'column': 'hello', 'type': 'Date'}]
 
-
 def test_bool():
     
     lst_of_dicts = [{'hello':'True'},{'hello':'False'}]
@@ -99,6 +97,3 @@ def test_extract_values():
 
     lst_of_dicts = [{'hello':'1'},{'hello':'0'},{'hey':'1'},{'hey':'1'}, {'who':'3'}]
     assert extract_values(lst_of_dicts) == {'hello','hey'}
-
-def detect_index():
-    pass

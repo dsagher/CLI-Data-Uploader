@@ -1,6 +1,6 @@
 from convert import dataset
 from re import fullmatch
-from typing import Optional
+
 
 def get_boolean(key: str) -> str:
     '''
@@ -73,7 +73,7 @@ def get_numeric(key: str, values: set, precision_decision: list) -> str:
 
     return result
 
-def get_index() -> Optional[str]:
+def get_index() -> str:
     '''
     This function runs if user specifies wants index.
 

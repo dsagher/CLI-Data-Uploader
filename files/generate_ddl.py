@@ -29,19 +29,19 @@ def generate_ddl(response: list[dict], want_index: bool, precision_decision: lis
     for dct in response: 
         for field in dataset.columns:
             if dct['column'] == field and dct['type'] == 'Numeric':
-                # print(dct['column'],dct['type'])
+                
                 result.append(get_numeric(field, dataset.dicts[field], precision_decision))
                 
             elif dct['column'] == field and dct['type'] == 'Character':
-                # print(dct['column'],dct['type'])
+                
                 result.append(get_char(field, dataset.dicts[field]))
 
             elif dct['column'] == field and dct['type'] == 'Boolean':
-                # print(dct['column'],dct['type'])
+                
                 result.append(get_boolean(field))
 
             elif dct['column'] == field and dct['type'] == 'Date':
-                # print(dct['column'],dct['type'])
+                
                 result.append(get_date(field, dataset.dicts[field]))
 
     return result
